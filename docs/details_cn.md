@@ -2,7 +2,7 @@
 
 <h1 align = "center">🌟LilyGO Mini Epaper🌟</h1>
 
-### [English](../README.MD) | 中文
+### [English](../../README.MD) | 中文
 
 --------------------------------------
 
