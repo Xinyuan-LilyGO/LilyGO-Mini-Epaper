@@ -29,6 +29,7 @@
 
 ```
 examples
+├── Extension                        # Expansion Board Example
 ├── GxEPD_Hello_world                # EPD  Hello world example 
 ├── GxEPD_RGB_LED                    # RGB LED example 
 ├── GxEPD_SD_Example                 # 1.02" SD example 
