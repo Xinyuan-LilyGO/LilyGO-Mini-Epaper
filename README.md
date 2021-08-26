@@ -8,7 +8,7 @@
 
 <h2 align = "left">Quick start ⚡:</h2>
 
-# USE Arduino IDE
+#### USE Arduino IDE
 
 1. Install the following two dependencies
      - [Adafruit-GFX-Library](https://github.com/adafruit/Adafruit-GFX-Library)
@@ -22,7 +22,7 @@
 
 
 
-# USE PlatformIO
+#### USE PlatformIO
 
 1. Install[VSCODE](https://code.visualstudio.com/)and[Python](https://www.python.org/)
 2. Search for the PlatformIO plug-in in the VSCODE extension and install it.
