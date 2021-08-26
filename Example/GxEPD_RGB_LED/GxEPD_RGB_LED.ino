@@ -19,7 +19,6 @@
 #define _HAS_SDCARD_
 
 
-
 bool rlst = false;
 // Set up the rgb led names
 uint8_t ledR = 25;

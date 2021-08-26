@@ -119,9 +119,6 @@ void setup(void)
 
 void loop()
 {
-
-
-
     Serial.println("loop");
     uint32_t actual = millis();
     while (actual < next_time) {
