@@ -8,6 +8,7 @@
 
 <h2 align = "left">Quick start ⚡:</h2>
 
+# USE Arduino IDE
 
 1. Install the following two dependencies
      - [Adafruit-GFX-Library](https://github.com/adafruit/Adafruit-GFX-Library)
@@ -18,6 +19,15 @@
 6. If you do not find the ESP32 series in the development board, then you should see the following installation method [How to install ESP32 in ArduinoIDE](https://github.com/espressif/arduino-esp32/blob/master/docs/arduino-ide/boards_manager.md)
 7. For the version of the board you purchased, please check the product link below 
 8. When you think there is a problem with your board, you can pull the binary file corresponding to your screen model in the firmware directory, follow the `SETTING.png` settings in the directory, download it to the board, and then observe the execution. 
+
+
+
+# USE PlatformIO
+
+1. Install[VSCODE](https://code.visualstudio.com/)and[Python](https://www.python.org/)
+2. Search for the PlatformIO plug-in in the VSCODE extension and install it.
+3. After the installation is complete and the reload is completed, there will be a small house icon in the lower left corner. Click to display the Platformio IDE home page
+4. Go to file - > Open folder - > Select the LilyGO-Mini-Epaper folder and click the (√) symbol in the lower left corner to compile (→) for upload.
 
 <h2 align = "left">Product link📷:</h2>
 

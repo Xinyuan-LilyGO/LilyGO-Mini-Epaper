@@ -32,6 +32,7 @@
 
 ```
 examples
+├── Extension                       # 扩展板示例
 ├── Hello_World_U8G2_Fonts          # U8g2 字体示例
 ├── GxEPD_Hello_world               # 你好世界 示例
 ├── GxEPD_RGB_LED                   # RGB LED 示例
