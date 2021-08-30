@@ -249,7 +249,6 @@ void loop()
 
 bool check_button1(uint8_t pin)
 {
-
     if (digitalRead(pin) == 0)   {
         delay(200);
         //Wait for release
@@ -530,7 +529,6 @@ void EnterSleep()
     esp_deep_sleep_start();
     /*Turn on power control*/
 }
-
 
 void LilyGo_logo(void)
 {
