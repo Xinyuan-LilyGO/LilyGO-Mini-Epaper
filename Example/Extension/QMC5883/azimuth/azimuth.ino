@@ -32,7 +32,7 @@ void loop() {
 
   // Return Azimuth reading
   a = compass.getAzimuth();
-  
+
   Serial.print("A: ");
   Serial.print(a);
   Serial.println();
