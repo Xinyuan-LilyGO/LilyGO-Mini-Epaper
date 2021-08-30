@@ -1,7 +1,15 @@
 /*
-    LilyGo Ink Screen Series u8g2Fonts Test
+Weather_clock Test example
 
-*/
+You need to fill in the information correctly in the code.
+const char *ssid       = "********";
+const char *password   = "********";
+String openWeatherMapApiKey = "************************";
+String city = "****";
+String countryCode = "**";
+
+ This example code is in the public domain.
+ */
 
 
 #define LILYGO_T5_V102
