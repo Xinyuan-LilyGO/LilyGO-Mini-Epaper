@@ -33,6 +33,11 @@
 | :----------: | :------------------------------------------------------------------: |
 | [T5 V1.02]() | [Product link](https://pt.aliexpress.com/item/1005002857956100.html) |
 
+<h3 align = "left">PinOut :</h3>
+
+![](image/MINI1.02CORE.jpg)
+
+
 <h2 align = "left">Example description:</h2>
 
 ```
