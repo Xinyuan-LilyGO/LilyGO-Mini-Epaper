@@ -8,5 +8,5 @@
 3. Fill in the correct WIFI SSID and password
 4. You would see it if it were normal
 
-![](../image/Weather_clock.png)
+![](../../image/Weather_clock.png)
 
