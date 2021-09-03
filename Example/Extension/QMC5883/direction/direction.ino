@@ -16,24 +16,39 @@ Release under the GNU General Public License v3
 
 QMC5883LCompass compass;
 
+	const char bearings[12][3] =  {
+		{' ', ' ', 'N'},
+		{'N', 'N', 'E'},
+		{' ', 'N', 'E'},
+		{' ', ' ', 'E'},
+		{'E', 'S', 'E'},
+		{' ', 'S', 'E'},
+		{' ', ' ', 'S'},
+		{'S', 'S', 'W'},
+		{' ', 'S', 'W'},
+		{' ', ' ', 'W'},
+		{'W', 'N', 'W'},
+		{' ', 'N', 'W'},
+	};
+
 void setup() {
   Serial.begin(115200);
   Wire.begin(IIC_SDA, IIC_SCL);
   compass.init();
-  compass.setCalibration(-1461, 218, -1240, 885, 0, 1468);
+  compass.setCalibration(-268, 1680, 0, 2005, 0, 2052);
 }
 
 void loop() {
+
+
   compass.read();
   
   byte a = compass.getAzimuth();
+  byte b = compass.getBearing(a);
 
-  char myArray[3];
-  compass.getDirection(myArray, a);
-  
-  Serial.print(myArray[0]);
-  Serial.print(myArray[1]);
-  Serial.print(myArray[2]);
+  Serial.print(bearings[b][0]);
+  Serial.print(bearings[b][1]);
+  Serial.print(bearings[b][2]);
   Serial.println();
   
   delay(250);
