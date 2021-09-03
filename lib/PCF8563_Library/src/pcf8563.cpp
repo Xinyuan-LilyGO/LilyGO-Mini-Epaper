@@ -301,7 +301,7 @@ const char *PCF8563_Class::formatDateTime(uint8_t sytle)
     RTC_Date t = getDateTime();
     switch (sytle) {
     case PCF_TIMEFORMAT_HM:
-        snprintf(format, sizeof(format), "%d:%2d", t.hour, t.minute);
+        snprintf(format, sizeof(format), "%02d:%02d", t.hour, t.minute);
         break;
     case PCF_TIMEFORMAT_HMS:
         snprintf(format, sizeof(format), "%d:%d:%d", t.hour, t.minute, t.second);

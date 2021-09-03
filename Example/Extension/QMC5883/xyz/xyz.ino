@@ -93,7 +93,7 @@ void loop() {
   display.print("Z:");display.println(z);
   display.updateWindow(box_x, box_y, box_w, box_h, true);
   complete_refresh++;
-  if(complete_refresh>100){//Use full brush after 100 rounds
+  if(complete_refresh>10){//Use full brush after 100 rounds
       display.update();
       complete_refresh=0;
   }

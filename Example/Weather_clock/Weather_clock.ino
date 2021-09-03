@@ -26,20 +26,6 @@ String countryCode = "**";
 #include GxEPD_BitmapExamples
 #include <U8g2_for_Adafruit_GFX.h>
 // FreeFonts from Adafruit_GFX
-
-#include <Fonts/FreeMonoBold9pt7b.h>
-#include <Fonts/FreeMonoBold12pt7b.h>
-#include <Fonts/FreeMonoBoldOblique12pt7b.h>
-#include <Fonts/FreeMonoOblique12pt7b.h>
-#include <Fonts/FreeSans12pt7b.h>
-#include <Fonts/FreeSansBold12pt7b.h>
-#include <Fonts/FreeSansBoldOblique12pt7b.h>
-#include <Fonts/FreeSerif12pt7b.h>
-#include <Fonts/FreeSerifBold12pt7b.h>
-#include <Fonts/FreeSerifBoldItalic12pt7b.h>
-#include <Fonts/FreeSerifItalic12pt7b.h>
-
-
 #include <Fonts/FreeMono12pt7b.h>
 #include <Fonts/FreeMonoBold18pt7b.h>
 #include <Fonts/FreeMonoBold24pt7b.h>
@@ -474,8 +460,6 @@ void display_Battery()
 
     int sensorValue = analogRead(35);
     float voltage = sensorValue * (3.3 / 4096);
-    Serial.println(sensorValue);
-    Serial.println(voltage);
     delay(100);
     voltage = (voltage*2) - 3.0;
     int ADC_Int = (int)(voltage / 0.083);
@@ -483,8 +467,8 @@ void display_Battery()
     if (ADC_Int > 12) ADC_Int = 12;
     else if (ADC_Int < 0) ADC_Int = 0;
     // print out the value you read:
-    Serial.println(sensorValue);
-    Serial.println(voltage);
+    //Serial.println(sensorValue);
+    //Serial.println(voltage);
     display.setRotation(0);
     display.drawExampleBitmap(BMP[ADC_Int], 65, 0, 16, 8, GxEPD_BLACK);
 
