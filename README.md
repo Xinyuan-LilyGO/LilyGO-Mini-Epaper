@@ -43,11 +43,14 @@
 ```
 examples
 ├── Extension                        # Expansion Board Example
+├── GxEPD_Example                    # GxEPD Example
+├── GxEPD_Example2                   # GxEPD Example2
 ├── GxEPD_Hello_world                # EPD  Hello world example 
 ├── GxEPD_RGB_LED                    # RGB LED example 
 ├── GxEPD_SD_Example                 # 1.02" SD example 
 ├── Hello_World_U8G2_Fonts           # EPD  U8G2 Fonts Hello world example 
-└── Partial_UpdateTest               # Partial refresh example 
+├──Partial_UpdateTest                # Partial refresh example 
+└──Weather_clock  
 ```
 
 
