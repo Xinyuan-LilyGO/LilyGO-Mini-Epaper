@@ -50,7 +50,7 @@ examples
 ├── GxEPD_SD_Example                 # 1.02" SD example 
 ├── Hello_World_U8G2_Fonts           # EPD  U8G2 Fonts Hello world example 
 ├──Partial_UpdateTest                # Partial refresh example 
-└──Weather_clock  
+└──Integration 
 ```
 
 
