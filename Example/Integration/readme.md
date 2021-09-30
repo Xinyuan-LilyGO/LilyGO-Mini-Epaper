@@ -1,5 +1,7 @@
 <h1 align = "center">🌟LilyGO Mini Epaper🌟</h1>
 
+<h2 align = "left">Overview ⚡:</h2>
+In the example. Displays date, weather, steps, directions, battery capacity, and more.
 
 <h2 align = "left">Quick start ⚡:</h2>
 
@@ -8,5 +10,5 @@
 3. Fill in the correct WIFI SSID and password
 4. You would see it if it were normal
 
-![](../../image/Weather_clock-.png)
+![](../../image/Integration.png)
 

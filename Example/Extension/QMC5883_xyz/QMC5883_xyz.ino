@@ -31,10 +31,11 @@ QMC5883LCompass compass;
 #include <GxIO/GxIO.h>
 GxIO_Class io(SPI,  EPD_CS, EPD_DC,  EPD_RSET);
 GxEPD_Class display(io, EPD_RSET, EPD_BUSY);
-uint32_t last=0;
-uint32_t  complete_refresh=0;
+
 #else
 #endif /*E_PAPER_DISPLAY*/
+uint32_t last=0;
+uint32_t  complete_refresh=0;
 
 void setup() {
   Serial.begin(115200);
@@ -60,7 +61,7 @@ void setup() {
 
 void loop() {
 
-  if(millis()-last>1000){
+  if(millis()-last>3000){
   int x, y, z;
   // Read compass values
   compass.read();
@@ -77,6 +78,7 @@ void loop() {
   Serial.print(" Z: ");
   Serial.print(z);
   Serial.println();
+  
 #if defined(E_PAPER_DISPLAY)
   display.setRotation(1);
   display.setFont(&FreeMonoBold9pt7b);
@@ -99,6 +101,8 @@ void loop() {
   }
   last=millis();  
   #else
+
+  
   #endif
   }
 }
