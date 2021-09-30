@@ -172,8 +172,13 @@
 #define BUTTONS                 {36,39,0}
 #define BUTTON_COUNT            (3)
 
+
 #define POWER_ENABLE			(27)
 
+#define IIC_SDA                 (26)
+#define IIC_SCL                 (25)
+#define BMP_INT1                (38)
+#define BMP_INT2                (37)
 #define ADC_PIN                 (35)
 
 #define _HAS_ADC_DETECTED_

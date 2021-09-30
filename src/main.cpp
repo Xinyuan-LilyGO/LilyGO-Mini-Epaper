@@ -41,7 +41,7 @@ String countryCode = "**";
 #include "time.h"
 #include "pcf8563.h"
 #include "bma423.h"
-#include <QMC5883LCompass.h>
+#include "QMC5883LCompass.h"
 
 
 const char* ssid = "REPLACE_WITH_YOUR_SSID";

@@ -11,10 +11,9 @@ String countryCode = "**";
  This example code is in the public domain.
  */
 
-#define IIC_SDA 26
-#define IIC_SCL 25
+
 #define TIME_ZONE  8
-#define BMP_Int1 38
+
 
 #define LILYGO_T5_V102
 #include <FunctionalInterrupt.h>
@@ -703,8 +702,8 @@ void bma_irq(){
 
 void BMA_setup()
 {
-    pinMode(BMP_Int1, INPUT_PULLUP);
-    attachInterrupt(BMP_Int1,bma_irq, RISING); //Select the interrupt mode according to the actual circuit
+    pinMode(BMP_INT1, INPUT_PULLUP);
+    attachInterrupt(BMP_INT1,bma_irq, RISING); //Select the interrupt mode according to the actual circuit
 
 
 
