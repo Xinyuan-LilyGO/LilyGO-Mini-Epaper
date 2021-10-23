@@ -166,6 +166,8 @@
 #define SDCARD_MISO             (2)
 #define SDCARD_SCLK             (14)
 
+#define MOTOR                    (12)
+
 #define BUTTON_1                (36)
 #define BUTTON_2                (39)
 #define BUTTON_3                 (0u)//BUTTON_3
