@@ -1209,7 +1209,7 @@ void EnterSleep()
     //display.print("EnterSleep");   
     display.update();
     delay(2000);
-    esp_sleep_enable_ext1_wakeup(((uint64_t)(((uint64_t)1) << BUTTON_3)), ESP_EXT1_WAKEUP_ALL_LOW);
+    esp_sleep_enable_ext1_wakeup(((uint64_t)(((uint64_t)1) << BUTTON_1)), ESP_EXT1_WAKEUP_ALL_LOW);
     esp_deep_sleep_start();
     /*Turn on power control*/
 }
