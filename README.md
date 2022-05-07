@@ -8,6 +8,16 @@
 
 <h2 align = "left">Quick start ⚡:</h2>
 
+#### USE PlatformIO
+
+1. Install[VSCODE](https://code.visualstudio.com/)and[Python](https://www.python.org/)
+2. Search for the PlatformIO plug-in in the VSCODE extension and install it.
+3. After the installation is complete and the reload is completed, there will be a small house icon in the lower left corner. Click to display the Platformio IDE home page
+4. Go to file - > Open folder - > Select the LilyGO-Mini-Epaper folder and click the (√) symbol in the lower left corner to compile (→) for upload.
+
+
+
+
 #### USE Arduino IDE
 
 
