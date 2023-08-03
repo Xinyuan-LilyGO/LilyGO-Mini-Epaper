@@ -8,8 +8,8 @@
 // #define LILYGO_T5_V22
 // #define LILYGO_T5_V24
 // #define LILYGO_T5_V28
-#define LILYGO_T5_V102
-// #define LILYGO_S3_V102
+// #define LILYGO_T5_V102
+   #define LILYGO_S3_V102
 // #define LILYGO_T5_V266
 // #define LILYGO_EPD_DISPLAY_102
 // #define LILYGO_EPD_DISPLAY_154
