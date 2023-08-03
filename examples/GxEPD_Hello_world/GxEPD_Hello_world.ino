@@ -9,6 +9,7 @@
 // #define LILYGO_T5_V24
 // #define LILYGO_T5_V28
 #define LILYGO_T5_V102
+// #define LILYGO_S3_V102
 // #define LILYGO_T5_V266
 // #define LILYGO_EPD_DISPLAY_102
 // #define LILYGO_EPD_DISPLAY_154
@@ -17,7 +18,7 @@
 
 #include <GxEPD.h>
 #include <boards.h>
-#if defined(LILYGO_T5_V102) || defined(LILYGO_EPD_DISPLAY_102)
+#if defined(LILYGO_T5_V102) || defined(LILYGO_S3_V102) || defined(LILYGO_EPD_DISPLAY_102)
 #include <GxGDGDEW0102T4/GxGDGDEW0102T4.h> //1.02" b/w
 #elif defined(LILYGO_T5_V266)
 #include <GxDEPG0266BN/GxDEPG0266BN.h>    // 2.66" b/w   form DKE GROUP
@@ -71,10 +72,10 @@ void setup(void)
     pinMode(EPD_POWER_ENABLE, OUTPUT);
     digitalWrite(EPD_POWER_ENABLE, HIGH);
 #endif /*LILYGO_EPD_DISPLAY_102*/
-#if defined(LILYGO_T5_V102)
+#if defined(LILYGO_T5_V102) || defined(LILYGO_S3_V102)
     pinMode(POWER_ENABLE, OUTPUT);
     digitalWrite(POWER_ENABLE, HIGH);
-#endif /*LILYGO_T5_V102*/
+#endif /*LILYGO_T5_V102 || LILYGO_S3_V102*/
     SPI.begin(EPD_SCLK, EPD_MISO, EPD_MOSI);
     display.init(); // enable diagnostic output on Serial
 
