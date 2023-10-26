@@ -8,7 +8,8 @@
 // #define LILYGO_T5_V22
 // #define LILYGO_T5_V24
 // #define LILYGO_T5_V28
-// #define LILYGO_T5_V102
+// #define LILYGO_MINI_EPAPER_ESP32
+// #define LILYGO_MINI_EPAPER_ESP32S3
 // #define LILYGO_T5_V266
 // #define LILYGO_EPD_DISPLAY_102      //Depend  https://github.com/adafruit/Adafruit_NeoPixel
 // #define LILYGO_EPD_DISPLAY_154
@@ -18,7 +19,7 @@
 #include <SD.h>
 #include <FS.h>
 
-#if defined(LILYGO_T5_V102) || defined(LILYGO_EPD_DISPLAY_102)
+#if defined(LILYGO_MINI_EPAPER_ESP32) || defined(LILYGO_MINI_EPAPER_ESP32S3) || defined(LILYGO_EPD_DISPLAY_102) || defined(LILYGO_MINI_EPAPER_ESP32S3)
 #include <GxGDGDEW0102T4/GxGDGDEW0102T4.h> //1.02" b/w
 #include <Adafruit_NeoPixel.h>             //Depend  https://github.com/adafruit/Adafruit_NeoPixel
 #elif defined(LILYGO_T5_V266)
@@ -201,7 +202,7 @@ void setup()
 
 #if defined(_HAS_SDCARD_)
     display.setRotation(1);
-#if defined(LILYGO_T5_V102)
+#if defined(LILYGO_MINI_EPAPER_ESP32) || defined(LILYGO_MINI_EPAPER_ESP32S3)
     display.setCursor(5, display.height() - 15);
 #else
     display.setCursor(20, display.height() - 15);

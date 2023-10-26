@@ -9,7 +9,7 @@
  *
  */
 
-#define LILYGO_T5_V102                              //Using TTGO MINI E-Paper 1.02" epaper
+#define LILYGO_MINI_EPAPER_ESP32                              //Using TTGO MINI E-Paper 1.02" epaper
 
 #define USING_BME280_SENSOR                         //Using bme280 sensor , attach to SDA:18  SCL:33
 #define TIME_TO_SLEPP_MINUTE        10              //Sleep time unit : minutes
@@ -274,7 +274,7 @@ void setupButton()
 
 void setupDisplay()
 {
-#if defined(LILYGO_T5_V102)  || defined(LILYGO_EPD_DISPLAY_102)
+#if defined(LILYGO_MINI_EPAPER_ESP32) || defined(LILYGO_MINI_EPAPER_ESP32S3)  || defined(LILYGO_EPD_DISPLAY_102)
     pinMode(EPD_POWER_ENABLE, OUTPUT);
     digitalWrite(EPD_POWER_ENABLE, HIGH);
 #endif /*LILYGO_EPD_DISPLAY_102*/
@@ -332,7 +332,7 @@ void sleep()
 
     Wire.end();
 
-#if defined(LILYGO_T5_V102)  || defined(LILYGO_EPD_DISPLAY_102)
+#if defined(LILYGO_MINI_EPAPER_ESP32) || defined(LILYGO_MINI_EPAPER_ESP32S3)  || defined(LILYGO_EPD_DISPLAY_102)
     digitalWrite(EPD_POWER_ENABLE, LOW);
     pinMode(EPD_POWER_ENABLE, INPUT);
 #endif /*LILYGO_EPD_DISPLAY_102*/

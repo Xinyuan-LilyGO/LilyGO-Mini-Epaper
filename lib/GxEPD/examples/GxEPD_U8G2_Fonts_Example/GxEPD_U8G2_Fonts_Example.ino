@@ -9,13 +9,15 @@
 // #define LILYGO_T5_V24
 // #define LILYGO_T5_V28
 // #define LILYGO_T5_V266
+// #define LILYGO_MINI_EPAPER_ESP32
+// #define LILYGO_MINI_EPAPER_ESP32S3
 // #define LILYGO_EPD_DISPLAY_102
 // #define LILYGO_EPD_DISPLAY_154
 
 #include <boards.h>
 #include <GxEPD.h>
 
-#if defined(LILYGO_T5_V102) || defined(LILYGO_EPD_DISPLAY_102)
+#if defined(LILYGO_MINI_EPAPER_ESP32) || defined(LILYGO_MINI_EPAPER_ESP32S3) || defined(LILYGO_EPD_DISPLAY_102) || defined(LILYGO_MINI_EPAPER_ESP32S3)
 #include <GxGDGDEW0102T4/GxGDGDEW0102T4.h> //1.02" b/w
 #elif defined(LILYGO_T5_V266)
 #include <GxDEPG0266BN/GxDEPG0266BN.h>    // 2.66" b/w   form DKE GROUP

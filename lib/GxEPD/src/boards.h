@@ -148,47 +148,25 @@
 #define _HAS_LED_
 // #define _HAS_SPEAKER_
 #define _HAS_SDCARD_
-#elif defined(LILYGO_EPD_DISPLAY_102)
 
-#define EPD_MOSI                (4)
-#define EPD_MISO                (-1)
-#define EPD_SCLK                (5)
-#define EPD_CS                  (6)
 
-#define EPD_BUSY                (7)
-#define EPD_RSET                (15)
-#define EPD_DC                  (16)
-
-#define EPD_POWER_ENABLE        (14)
-
-#define BUTTON_1                (35)
-#define BUTTON_COUNT            (1)
-
-#define ADC_PIN                 (35)
-#define RGB_STRIP_PIN           (4)
-#define RGB_STRIP_COUNT         (1)
-
-#define _HAS_ADC_DETECTED_
-#define _HAS_POWER_CONTROL_
-#define _HAS_RGB_PIXEL_
-
-#elif defined(LILYGO_T5_V102)
+#elif defined(LILYGO_MINI_EPAPER_ESP32) || defined(LILYGO_T5_V102)
 
 #define EPD_MOSI                (21)
 #define EPD_MISO                (-1)
 #define EPD_SCLK                (22)
 #define EPD_CS                  (5)
 
-#define EPD_BUSY                (18)
-#define EPD_RSET                (23)
+#define EPD_BUSY                (34)
+#define EPD_RSET                (4)
 #define EPD_DC                  (19)
 
 #define EPD_POWER_ENABLE        (27)
 
-#define SDCARD_CS               (-1)
-#define SDCARD_MOSI             (-1)
-#define SDCARD_MISO             (-1)
-#define SDCARD_SCLK             (-1)
+#define SDCARD_CS               (13)
+#define SDCARD_MOSI             (15)
+#define SDCARD_MISO             (2)
+#define SDCARD_SCLK             (14)
 
 #define BUTTON_1                (36)
 #define BUTTON_2                (39)
@@ -196,13 +174,17 @@
 #define BUTTONS                 {36,39,0}
 #define BUTTON_COUNT            (3)
 
-
+#define MOTOR                   (12)
+#define IIC_SDA                 (26)
+#define IIC_SCL                 (25)
+#define BMP_INT1                (38)
+#define BMP_INT2                (37)
 #define ADC_PIN                 (35)
 
 #define _HAS_ADC_DETECTED_
 #define _HAS_SDCARD_
 
-#elif defined(LILYGO_S3_V102)
+#elif defined(LILYGO_MINI_EPAPER_ESP32S3)
 
 #define EPD_MOSI                (15)
 #define EPD_MISO                (-1)
@@ -213,7 +195,7 @@
 #define EPD_RSET                (11)
 #define EPD_DC                  (12)
 
-#define POWER_ENABLE            (42)
+#define EPD_POWER_ENABLE            (42)
 
 #define SDCARD_CS               (40)
 #define SDCARD_MOSI             (39)
@@ -226,11 +208,16 @@
 #define BUTTONS                 {3,4,0}
 #define BUTTON_COUNT            (3)
 
-
+#define MOTOR                   (21)
+#define IIC_SDA                 (7)
+#define IIC_SCL                 (8)
+#define BMP_INT1                (6)
+#define BMP_INT2                (16)
 #define ADC_PIN                 (43)
 
 #define _HAS_ADC_DETECTED_
 #define _HAS_SDCARD_
+
 
 #elif defined(LILYGO_T5_V266)
 

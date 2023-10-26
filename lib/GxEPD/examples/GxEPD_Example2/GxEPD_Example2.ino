@@ -8,7 +8,8 @@
 // #define LILYGO_T5_V22
 // #define LILYGO_T5_V24
 // #define LILYGO_T5_V28
-// #define LILYGO_T5_V102
+// #define LILYGO_MINI_EPAPER_ESP32
+// #define LILYGO_MINI_EPAPER_ESP32S3
 // #define LILYGO_T5_V266
 // #define LILYGO_EPD_DISPLAY_102
 // #define LILYGO_EPD_DISPLAY_154
@@ -21,7 +22,7 @@
 
 using namespace         ace_button;
 
-#if defined(LILYGO_T5_V102) || defined(LILYGO_EPD_DISPLAY_102)
+#if defined(LILYGO_MINI_EPAPER_ESP32) || defined(LILYGO_MINI_EPAPER_ESP32S3) || defined(LILYGO_EPD_DISPLAY_102) || defined(LILYGO_MINI_EPAPER_ESP32S3)
 #include <GxGDGDEW0102T4/GxGDGDEW0102T4.h> //1.02" b/w
 #elif defined(LILYGO_T5_V266)
 #include <GxDEPG0266BN/GxDEPG0266BN.h>    // 2.66" b/w   form DKE GROUP
@@ -170,7 +171,7 @@ static void aceButtonHandleEventCb(AceButton *b, uint8_t event, uint8_t state)
     Serial.printf("Pin:%d event:%u state:%u\n", b->getPin(), event, state);
 
 
-#ifdef LILYGO_T5_V102
+#ifdef LILYGO_MINI_EPAPER_ESP32
     if (event != AceButton::kEventReleased && event != AceButton::kEventLongPressed) {
         return;
     }
@@ -182,7 +183,7 @@ static void aceButtonHandleEventCb(AceButton *b, uint8_t event, uint8_t state)
 
     switch (b->getPin()) {
     case BUTTON_1:
-#ifdef LILYGO_T5_V102
+#ifdef LILYGO_MINI_EPAPER_ESP32
         event == AceButton::kEventLongPressed ? EnterSleep() : GxepdPage0();
 #else
         event == AceButton::kEventClicked ? GxepdPage0() : EnterSleep();
@@ -226,7 +227,7 @@ void setup()
     btn1.init(BUTTON_1);
     ButtonConfig *buttonConfig = btn1.getButtonConfig();
     buttonConfig->setEventHandler(aceButtonHandleEventCb);
-#ifdef LILYGO_T5_V102
+#ifdef LILYGO_MINI_EPAPER_ESP32
     buttonConfig->setFeature(ButtonConfig::kFeatureRepeatPress);
 #else
     buttonConfig->setFeature(ButtonConfig::kFeatureClick);
@@ -238,7 +239,7 @@ void setup()
     btn2.init(BUTTON_2);
     buttonConfig = btn2.getButtonConfig();
     buttonConfig->setEventHandler(aceButtonHandleEventCb);
-#ifdef LILYGO_T5_V102
+#ifdef LILYGO_MINI_EPAPER_ESP32
     buttonConfig->setFeature(ButtonConfig::kFeatureRepeatPress);
 #else
     buttonConfig->setFeature(ButtonConfig::kFeatureClick);
@@ -250,7 +251,7 @@ void setup()
     btn3.init(BUTTON_3);
     buttonConfig = btn3.getButtonConfig();
     buttonConfig->setEventHandler(aceButtonHandleEventCb);
-#ifdef LILYGO_T5_V102
+#ifdef LILYGO_MINI_EPAPER_ESP32
     buttonConfig->setFeature(ButtonConfig::kFeatureRepeatPress);
 #else
     buttonConfig->setFeature(ButtonConfig::kFeatureClick);
@@ -300,7 +301,7 @@ void GxepdPage0()
     display.setRotation(1);
     display.setTextColor(GxEPD_BLACK);
     display.setFont();
-#if defined(LILYGO_T5_V102)
+#if defined(LILYGO_MINI_EPAPER_ESP32) || defined(LILYGO_MINI_EPAPER_ESP32S3)
     display.setCursor(5, display.height() - 15);
 #else
     display.setCursor(20, display.height() - 15);
