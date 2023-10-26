@@ -1,2 +1,5 @@
 .pio
 .vscode
+script
+build
+test.sh
