@@ -4,50 +4,20 @@
 */
 
 // According to the board, cancel the corresponding macro definition
-// #define LILYGO_T5_V213
-// #define LILYGO_T5_V22
-// #define LILYGO_T5_V24
-// #define LILYGO_T5_V28
-// #define LILYGO_T5_V266
-// #define LILYGO_EPD_DISPLAY_102
-// #define LILYGO_EPD_DISPLAY_154
-#define LILYGO_T5_V102
+// https://www.lilygo.cc/products/mini-e-paper-core , esp32picod4
+// #define LILYGO_MINI_EPAPER_ESP32
+// esp32s3-fn4r2
+// #define LILYGO_MINI_EPAPER_ESP32S3
+
+#if !defined(LILYGO_MINI_EPAPER_ESP32S3)  && !defined(LILYGO_MINI_EPAPER_ESP32)
+// 请在草图上方选择对应的目标板子名称,将它取消注释.
+#error "Please select the corresponding target board name above the sketch and uncomment it."
+#endif
 
 #include <boards.h>
 #include <GxEPD.h>
-
-
-#if defined(LILYGO_T5_V102) || defined(LILYGO_EPD_DISPLAY_102)
 #include <GxGDGDEW0102T4/GxGDGDEW0102T4.h> //1.02" b/w
-#elif defined(LILYGO_T5_V266)
-#include <GxDEPG0266BN/GxDEPG0266BN.h>    // 2.66" b/w   form DKE GROUP
-#elif defined(LILYGO_T5_V213)
-#include <GxDEPG0213BN/GxDEPG0213BN.h>    // 2.13" b/w  form DKE GROUP
-#else
-// #include <GxGDGDEW0102T4/GxGDGDEW0102T4.h> //1.02" b/w
-// #include <GxGDEW0154Z04/GxGDEW0154Z04.h>  // 1.54" b/w/r 200x200
-// #include <GxGDEW0154Z17/GxGDEW0154Z17.h>  // 1.54" b/w/r 152x152
-// #include <GxGDEH0154D67/GxGDEH0154D67.h>  // 1.54" b/w
-// #include <GxDEPG0150BN/GxDEPG0150BN.h>    // 1.51" b/w   form DKE GROUP
-// #include <GxDEPG0266BN/GxDEPG0266BN.h>    // 2.66" b/w   form DKE GROUP
-// #include <GxDEPG0290R/GxDEPG0290R.h>      // 2.9" b/w/r  form DKE GROUP
-// #include <GxDEPG0290B/GxDEPG0290B.h>      // 2.9" b/w    form DKE GROUP
-// #include <GxGDEW029Z10/GxGDEW029Z10.h>    // 2.9" b/w/r  form GoodDisplay
-// #include <GxGDEW0213Z16/GxGDEW0213Z16.h>  // 2.13" b/w/r form GoodDisplay
-// #include <GxGDE0213B1/GxGDE0213B1.h>      // 2.13" b/w  old panel , form GoodDisplay
-// #include <GxGDEH0213B72/GxGDEH0213B72.h>  // 2.13" b/w  old panel , form GoodDisplay
-// #include <GxGDEH0213B73/GxGDEH0213B73.h>  // 2.13" b/w  old panel , form GoodDisplay
-// #include <GxGDEM0213B74/GxGDEM0213B74.h>  // 2.13" b/w  form GoodDisplay 4-color
-// #include <GxGDEW0213M21/GxGDEW0213M21.h>  // 2.13"  b/w Ultra wide temperature , form GoodDisplay
-// #include <GxDEPG0213BN/GxDEPG0213BN.h>    // 2.13" b/w  form DKE GROUP
-// #include <GxGDEW027W3/GxGDEW027W3.h>      // 2.7" b/w   form GoodDisplay
-// #include <GxGDEW027C44/GxGDEW027C44.h>    // 2.7" b/w/r form GoodDisplay
-// #include <GxGDEH029A1/GxGDEH029A1.h>      // 2.9" b/w   form GoodDisplay
-// #include <GxDEPG0750BN/GxDEPG0750BN.h>    // 7.5" b/w   form DKE GROUP
-#endif
-
 #include GxEPD_BitmapExamples
-
 // FreeFonts from Adafruit_GFX
 #include <Fonts/FreeMonoBold9pt7b.h>
 #include <Fonts/FreeMonoBold12pt7b.h>
@@ -55,21 +25,11 @@
 #include <GxIO/GxIO_SPI/GxIO_SPI.h>
 #include <GxIO/GxIO.h>
 
-
-
-
-
-// for SPI pin definitions see e.g.:
-// C:\Users\xxx\Documents\Arduino\hardware\espressif\esp32\variants\lolin32\pins_arduino.h
-
 GxIO_Class io(SPI,  EPD_CS, EPD_DC,  EPD_RSET);
 GxEPD_Class display(io, EPD_RSET, EPD_BUSY);
 
-
-
 const uint32_t partial_update_period_s = 1;
 const uint32_t full_update_period_s = 6 * 60 * 60;
-
 
 uint32_t start_time;
 uint32_t next_time;
@@ -87,14 +47,8 @@ void setup(void)
     Serial.println();
     Serial.println("setup");
 
-#if defined(LILYGO_EPD_DISPLAY_102)
     pinMode(EPD_POWER_ENABLE, OUTPUT);
     digitalWrite(EPD_POWER_ENABLE, HIGH);
-#endif /*LILYGO_EPD_DISPLAY_102*/
-#if defined(LILYGO_T5_V102)
-    pinMode(POWER_ENABLE, OUTPUT);
-    digitalWrite(POWER_ENABLE, HIGH);
-#endif /*LILYGO_T5_V102*/
 
     // draw background
     SPI.begin(EPD_SCLK, EPD_MISO, EPD_MOSI);

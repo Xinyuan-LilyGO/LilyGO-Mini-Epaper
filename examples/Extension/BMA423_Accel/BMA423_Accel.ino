@@ -5,47 +5,18 @@ This example code is in the public domain.
 */
 
 // According to the board, cancel the corresponding macro definition
-// #define LILYGO_T5_V213
-// #define LILYGO_T5_V22
-// #define LILYGO_T5_V24
-// #define LILYGO_T5_V28
-#define LILYGO_T5_V102
-// #define LILYGO_T5_V266
-// #define LILYGO_EPD_DISPLAY_102
-// #define LILYGO_EPD_DISPLAY_154
+// https://www.lilygo.cc/products/mini-e-paper-core , esp32picod4
+// #define LILYGO_MINI_EPAPER_ESP32
+// esp32s3-fn4r2
+// #define LILYGO_MINI_EPAPER_ESP32S3
+#if !defined(LILYGO_MINI_EPAPER_ESP32S3)  && !defined(LILYGO_MINI_EPAPER_ESP32)
+// 请在草图上方选择对应的目标板子名称,将它取消注释.
+#error "Please select the corresponding target board name above the sketch and uncomment it."
+#endif
 
 #include <boards.h>
 #include <GxEPD.h>
-
-#if defined(LILYGO_T5_V102) || defined(LILYGO_EPD_DISPLAY_102)
 #include <GxGDGDEW0102T4/GxGDGDEW0102T4.h> //1.02" b/w
-#elif defined(LILYGO_T5_V266)
-#include <GxDEPG0266BN/GxDEPG0266BN.h>    // 2.66" b/w   form DKE GROUP
-#elif defined(LILYGO_T5_V213)
-#include <GxDEPG0213BN/GxDEPG0213BN.h>    // 2.13" b/w  form DKE GROUP
-#else
-// #include <GxGDGDEW0102T4/GxGDGDEW0102T4.h> //1.02" b/w
-// #include <GxGDEW0154Z04/GxGDEW0154Z04.h>  // 1.54" b/w/r 200x200
-// #include <GxGDEW0154Z17/GxGDEW0154Z17.h>  // 1.54" b/w/r 152x152
-// #include <GxGDEH0154D67/GxGDEH0154D67.h>  // 1.54" b/w
-// #include <GxDEPG0150BN/GxDEPG0150BN.h>    // 1.51" b/w   form DKE GROUP
-// #include <GxDEPG0266BN/GxDEPG0266BN.h>    // 2.66" b/w   form DKE GROUP
-// #include <GxDEPG0290R/GxDEPG0290R.h>      // 2.9" b/w/r  form DKE GROUP
-// #include <GxDEPG0290B/GxDEPG0290B.h>      // 2.9" b/w    form DKE GROUP
-// #include <GxGDEW029Z10/GxGDEW029Z10.h>    // 2.9" b/w/r  form GoodDisplay
-// #include <GxGDEW0213Z16/GxGDEW0213Z16.h>  // 2.13" b/w/r form GoodDisplay
-// #include <GxGDE0213B1/GxGDE0213B1.h>      // 2.13" b/w  old panel , form GoodDisplay
-// #include <GxGDEH0213B72/GxGDEH0213B72.h>  // 2.13" b/w  old panel , form GoodDisplay
-// #include <GxGDEH0213B73/GxGDEH0213B73.h>  // 2.13" b/w  old panel , form GoodDisplay
-// #include <GxGDEM0213B74/GxGDEM0213B74.h>  // 2.13" b/w  form GoodDisplay 4-color
-// #include <GxGDEW0213M21/GxGDEW0213M21.h>  // 2.13"  b/w Ultra wide temperature , form GoodDisplay
-// #include <GxDEPG0213BN/GxDEPG0213BN.h>    // 2.13" b/w  form DKE GROUP
-// #include <GxGDEW027W3/GxGDEW027W3.h>      // 2.7" b/w   form GoodDisplay
-// #include <GxGDEW027C44/GxGDEW027C44.h>    // 2.7" b/w/r form GoodDisplay
-// #include <GxGDEH029A1/GxGDEH029A1.h>      // 2.9" b/w   form GoodDisplay
-// #include <GxDEPG0750BN/GxDEPG0750BN.h>    // 7.5" b/w   form DKE GROUP
-#endif
-
 // FreeFonts from Adafruit_GFX
 #include <Fonts/FreeMono9pt7b.h>
 #include <Fonts/FreeMonoBold9pt7b.h>
@@ -68,8 +39,8 @@ struct bma4_dev bma;
 struct bma4_accel sens_data;
 struct bma4_accel_config accel_conf;
 BMA423 sensor;
-uint32_t last=0;
-uint32_t  complete_refresh=0;
+uint32_t last = 0;
+uint32_t  complete_refresh = 0;
 int rslt;
 float x, y, z;
 
@@ -94,14 +65,8 @@ void setup(void)
     Serial.println();
     Serial.println("setup");
 
-#if defined(LILYGO_EPD_DISPLAY_102)
     pinMode(EPD_POWER_ENABLE, OUTPUT);
     digitalWrite(EPD_POWER_ENABLE, HIGH);
-#endif /*LILYGO_EPD_DISPLAY_102*/
-#if defined(LILYGO_T5_V102)
-    pinMode(POWER_ENABLE, OUTPUT);
-    digitalWrite(POWER_ENABLE, HIGH);
-#endif /*LILYGO_T5_V102*/
 
     SPI.begin(EPD_SCLK, EPD_MISO, EPD_MOSI);
     display.init(); // enable diagnostic output on Serial
@@ -123,7 +88,7 @@ void setup(void)
 
 void loop()
 {
-    if(millis()-last>1000){
+    if (millis() - last > 1000) {
         /* Read the accel data */
         rslt = bma4_read_accel_xyz(&sens_data, &bma);
 
@@ -145,16 +110,16 @@ void loop()
         uint16_t cursor_y = box_y + 16;
         display.fillRect(box_x, box_y, box_w, box_h, GxEPD_WHITE);
         display.setCursor(box_x, cursor_y);
-        display.print("X:");display.println(x);
-        display.print("Y:");display.println(y);
-        display.print("Z:");display.println(z);
+        display.print("X:"); display.println(x);
+        display.print("Y:"); display.println(y);
+        display.print("Z:"); display.println(z);
         display.updateWindow(box_x, box_y, box_w, box_h, true);
         complete_refresh++;
-        if(complete_refresh>100){//Use full brush after 100 rounds
+        if (complete_refresh > 100) { //Use full brush after 100 rounds
             display.update();
-            complete_refresh=0;
+            complete_refresh = 0;
         }
-        last=millis();
+        last = millis();
 
     }
 }

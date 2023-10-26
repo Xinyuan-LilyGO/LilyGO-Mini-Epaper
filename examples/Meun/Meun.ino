@@ -10,11 +10,21 @@ String countryCode = "**";
 
  This example code is in the public domain.
  */
+// According to the board, cancel the corresponding macro definition
+// https://www.lilygo.cc/products/mini-e-paper-core , esp32picod4
+// #define LILYGO_MINI_EPAPER_ESP32
+// esp32s3-fn4r2
+// #define LILYGO_MINI_EPAPER_ESP32S3
+
+#if !defined(LILYGO_MINI_EPAPER_ESP32S3)  && !defined(LILYGO_MINI_EPAPER_ESP32)
+// 请在草图上方选择对应的目标板子名称,将它取消注释.
+#error "Please select the corresponding target board name above the sketch and uncomment it."
+#endif
 
 
 #define TIME_ZONE  8
 #define TIME_WEATHER_SYNC //Reset to enable time weather calibration. You can comment it out
-#define LILYGO_T5_V102
+
 
 #include <FunctionalInterrupt.h>
 #include "battery_index.h"
@@ -42,18 +52,14 @@ String countryCode = "**";
 #include "bma423.h"
 #include <QMC5883LCompass.h>
 
-
-const char* ssid = "REPLACE_WITH_YOUR_SSID";
-const char* password = "REPLACE_WITH_YOUR_PASSWORD";
+const char *ssid = "REPLACE_WITH_YOUR_SSID";
+const char *password = "REPLACE_WITH_YOUR_PASSWORD";
 
 // Your Domain name with URL path or IP address with path
 String openWeatherMapApiKey = "REPLACE_WITH_YOUR_OPEN_WEATHER_MAP_API_KEY";
-
 // Replace with your country code and city
 String city = "Shenzhen";
 String countryCode = "CN";
-
-
 
 String jsonBuffer;
 uint32_t    last = 0;
@@ -67,19 +73,14 @@ const int   daylightOffset_sec = 3600 * (TIME_ZONE - 4);
 GxIO_Class io(SPI,  EPD_CS, EPD_DC,  EPD_RSET);
 GxEPD_Class display(io, EPD_RSET, EPD_BUSY);
 U8G2_FOR_ADAFRUIT_GFX u8g2Fonts;
-
 struct tm timeinfo;
 String current_weather;
-
 PCF8563_Class rtc;
-
 QMC5883LCompass compass;
 int calibrationData[3][2];
 bool changed = false;
 char myArray[3];
 uint32_t   QMC_last = 0;
-
-
 struct bma4_dev bma;
 struct bma4_accel sens_data;
 struct bma4_accel_config accel_conf;
@@ -89,9 +90,9 @@ uint32_t step_out = 0;
 /* Variable to get the interrupt status  */
 uint16_t int_status = 0;
 bool BMA_IRQ = false;
-uint16_t counter_IRQ=0;
+uint16_t counter_IRQ = 0;
 
-/* __  __ ______ _   _ _    _ 
+/* __  __ ______ _   _ _    _
  |  \/  |  ____| \ | | |  | |
  | \  / | |__  |  \| | |  | |
  | |\/| |  __| | . ` | |  | |
@@ -104,42 +105,39 @@ uint16_t counter_IRQ=0;
 #define ICON_BGAP (16)
 #define ICON_Y (72+ ICON_GAP)
 
-struct menu_entry_type
-{
-  const uint8_t *font;
-  uint16_t icon;
-  const char *name;
+struct menu_entry_type {
+    const uint8_t *font;
+    uint16_t icon;
+    const char *name;
 };
 
-struct menu_state
-{
-  int16_t menu_start;		/* in pixel */
-  int16_t frame_position;		/* in pixel */
-  uint8_t position;			/* position, array index */
+struct menu_state {
+    int16_t menu_start;       /* in pixel */
+    int16_t frame_position;       /* in pixel */
+    uint8_t position;         /* position, array index */
 };
 
 
-struct menu_entry_type menu_entry_list[] =
-{
-  { u8g2_font_open_iconic_all_6x_t, 123, "Integration"},
-  { u8g2_font_open_iconic_all_6x_t, 93, "Clock "},
-  //{ u8g2_font_open_iconic_all_6x_t, 225, "Music"},
-  { u8g2_font_open_iconic_all_6x_t, 259, "Weather"},
-  { u8g2_font_open_iconic_all_6x_t, 136, "Compass"},
-  { u8g2_font_open_iconic_all_6x_t, 94, "Bluetooth"},
-  { u8g2_font_open_iconic_all_6x_t, 281, "WIFI"},
-  { NULL, 0, NULL } 
+struct menu_entry_type menu_entry_list[] = {
+    { u8g2_font_open_iconic_all_6x_t, 123, "Integration"},
+    { u8g2_font_open_iconic_all_6x_t, 93, "Clock "},
+    //{ u8g2_font_open_iconic_all_6x_t, 225, "Music"},
+    { u8g2_font_open_iconic_all_6x_t, 259, "Weather"},
+    { u8g2_font_open_iconic_all_6x_t, 136, "Compass"},
+    { u8g2_font_open_iconic_all_6x_t, 94, "Bluetooth"},
+    { u8g2_font_open_iconic_all_6x_t, 281, "WIFI"},
+    { NULL, 0, NULL }
 };
 
 
 struct menu_state current_state = { ICON_BGAP, ICON_BGAP, 0 };
 struct menu_state destination_state = { ICON_BGAP, ICON_BGAP, 0 };
 
-bool first =true;
-bool meun_update_flag =false;
+bool first = true;
+bool meun_update_flag = false;
 
 /*
-  ____  _    _ _______ _______ ____  _   _ 
+  ____  _    _ _______ _______ ____  _   _
  |  _ \| |  | |__   __|__   __/ __ \| \ | |
  | |_) | |  | |  | |     | | | |  | |  \| |
  |  _ <| |  | |  | |     | | | |  | | . ` |
@@ -161,7 +159,7 @@ AceButton button2(BUTTON_2);
 AceButton button3((uint8_t)(BUTTON_3));
 
 // Forward reference to prevent Arduino compiler becoming confused.
-void handleEvent(AceButton*, uint8_t, uint8_t);
+void handleEvent(AceButton *, uint8_t, uint8_t);
 
 
 uint16_t writeRegister(uint8_t address, uint8_t reg, uint8_t *data, uint16_t len);
@@ -208,29 +206,28 @@ void setup(void)
     Serial.begin(115200);
     Serial.println("setup");
 
-    pinMode(POWER_ENABLE, OUTPUT);
-    pinMode(MOTOR, OUTPUT);
-    digitalWrite(POWER_ENABLE, HIGH);
+    pinMode(EPD_POWER_ENABLE, OUTPUT);
+    digitalWrite(EPD_POWER_ENABLE, HIGH);
 
+
+    pinMode(MOTOR, OUTPUT);
     digitalWrite(MOTOR, HIGH);
     delay(1000);
     digitalWrite(MOTOR, LOW);
 
+    // Buttons use the built-in pull up register.
+    pinMode(BUTTON_1, INPUT_PULLUP);
+    pinMode(BUTTON_2, INPUT_PULLUP);
+    pinMode(BUTTON_3, INPUT_PULLUP);
 
-    
-  // Buttons use the built-in pull up register.
-  pinMode(BUTTON_1, INPUT_PULLUP);
-  pinMode(BUTTON_2, INPUT_PULLUP);
-  pinMode(BUTTON_3, INPUT_PULLUP);
-
-  // Configure the ButtonConfig with the event handler, and enable all higher
-  // level events.
-  ButtonConfig* buttonConfig = ButtonConfig::getSystemButtonConfig();
-  buttonConfig->setEventHandler(handleEvent);
-  buttonConfig->setFeature(ButtonConfig::kFeatureClick);
-  buttonConfig->setFeature(ButtonConfig::kFeatureDoubleClick);
-  buttonConfig->setFeature(ButtonConfig::kFeatureLongPress);
-  buttonConfig->setFeature(ButtonConfig::kFeatureRepeatPress);
+    // Configure the ButtonConfig with the event handler, and enable all higher
+    // level events.
+    ButtonConfig *buttonConfig = ButtonConfig::getSystemButtonConfig();
+    buttonConfig->setEventHandler(handleEvent);
+    buttonConfig->setFeature(ButtonConfig::kFeatureClick);
+    buttonConfig->setFeature(ButtonConfig::kFeatureDoubleClick);
+    buttonConfig->setFeature(ButtonConfig::kFeatureLongPress);
+    buttonConfig->setFeature(ButtonConfig::kFeatureRepeatPress);
 
 
     SPI.begin(EPD_SCLK, EPD_MISO, EPD_MOSI);
@@ -263,7 +260,7 @@ void setup(void)
 
     get_weather();
 
-   
+
     WiFi.disconnect();
     WiFi.mode(WIFI_OFF);
 #else
@@ -279,7 +276,7 @@ void loop()
     uint8_t val = meun_loop();
     Serial.printf("Select : %d\n", val);
     switch (val) {
-     case 0:
+    case 0:
         clock_weather_loop();
         break;
     case 1:
@@ -306,173 +303,245 @@ void loop()
 }
 
 /*
-  __  __          _____ _   _ _      ____   ____  _____  
- |  \/  |   /\   |_   _| \ | | |    / __ \ / __ \|  __ \ 
+  __  __          _____ _   _ _      ____   ____  _____
+ |  \/  |   /\   |_   _| \ | | |    / __ \ / __ \|  __ \
  | \  / |  /  \    | | |  \| | |   | |  | | |  | | |__) |
- | |\/| | / /\ \   | | | . ` | |   | |  | | |  | |  ___/ 
- | |  | |/ ____ \ _| |_| |\  | |___| |__| | |__| | |     
- |_|  |_/_/    \_\_____|_| \_|______\____/ \____/|_|     
-                                                        
+ | |\/| | / /\ \   | | | . ` | |   | |  | | |  | |  ___/
+ | |  | |/ ____ \ _| |_| |\  | |___| |__| | |__| | |
+ |_|  |_/_/    \_\_____|_| \_|______\____/ \____/|_|
+
 */
-uint8_t clock_weather_loop(){
-  
-   display.fillScreen(GxEPD_WHITE);
+uint8_t clock_weather_loop()
+{
+
+    display.fillScreen(GxEPD_WHITE);
     display_time();
     display_Battery();
-    display_weather();  
-   
+    display_weather();
+
     display.update();
     delay(100);
-    for (;;)
-    {
+    for (;;) {
         /* code */
-  
-    
-    if (millis() - last > 10000) {
-        display_time();
-        display_Battery();
-        display_weather();
-        display_wifi();
-        if (update_flag == 6) {
-            display.update();
-            update_flag = 0;
+
+
+        if (millis() - last > 10000) {
+            display_time();
+            display_Battery();
+            display_weather();
+            display_wifi();
+            if (update_flag == 6) {
+                display.update();
+                update_flag = 0;
+            }
+            display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, false);//display.update();////display.update();
+            update_flag++;
+            last = millis();
         }
-        display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, false);//display.update();////display.update();
-        update_flag++;
-        last = millis();
+
+        if (millis() - QMC_last > 1000) {
+            QMC_main();
+            display.fillRect(105, 55, 10, 30, GxEPD_WHITE);
+            u8g2Fonts.setFont(u8g2_font_timB08_tr);
+            u8g2Fonts.setCursor(105, 55);
+            u8g2Fonts.print(myArray[0]);
+            u8g2Fonts.print(myArray[1]);
+            u8g2Fonts.print(myArray[2]);
+            display.updateWindow(105, 55, 10, 30, true);
+            QMC_last = millis();
+        }
+
+        BMA_main();
+
+        button1.check();
+        button2.check();
+        button3.check();
+
+
+        if (button3_flag)  {
+            wifi_status();
+            button3_flag = 0;
+        }
+        if (button1_flag)  {
+            button1_flag = 0 ;
+            return 0;
+        }
+        if (button2_flag)  {
+            button2_flag = 0;
+            return 0;
+        }
+        if (button3_long_flag)  {
+            button3_long_flag = 0;
+            EnterSleep();
+        }
+
+
     }
-
-   if(millis() - QMC_last > 1000) {
-        QMC_main();
-        display.fillRect(105, 55, 10, 30, GxEPD_WHITE);
-        u8g2Fonts.setFont(u8g2_font_timB08_tr);
-        u8g2Fonts.setCursor(105, 55);
-        u8g2Fonts.print(myArray[0]);
-        u8g2Fonts.print(myArray[1]);
-        u8g2Fonts.print(myArray[2]);
-        display.updateWindow(105, 55, 10, 30,true);
-        QMC_last = millis();
-    }
-
-    BMA_main();
-
-  button1.check();
-  button2.check();
-  button3.check();
-
-
-    if (button3_flag)  {wifi_status(); button3_flag = 0;}
-    if (button1_flag)  {button1_flag =0 ;return 0;}
-    if (button2_flag)  {button2_flag =0; return 0;}
-    if (button3_long_flag)  {button3_long_flag =0; EnterSleep();}
-
-
-  }
 }
 
-uint8_t clock_loop(){
+uint8_t clock_loop()
+{
     display.fillScreen(GxEPD_WHITE);
-    display.setCursor(0,50);
+    display.setCursor(0, 50);
     display.println("clock_loop");
     display.println("You can customize the functionality ");
     display.update();
 
- for (;;){
- 
-  button1.check();
-  button2.check();
-  button3.check();
+    for (;;) {
 
-    if (button3_flag)  {button3_flag = 0;}
-    if (button1_flag)  {button1_flag =0 ;return 0;}
-    if (button2_flag)  {button2_flag =0; return 0;}
-    if (button3_long_flag)  {button3_long_flag =0; EnterSleep();}
+        button1.check();
+        button2.check();
+        button3.check();
 
-  }
+        if (button3_flag)  {
+            button3_flag = 0;
+        }
+        if (button1_flag)  {
+            button1_flag = 0 ;
+            return 0;
+        }
+        if (button2_flag)  {
+            button2_flag = 0;
+            return 0;
+        }
+        if (button3_long_flag)  {
+            button3_long_flag = 0;
+            EnterSleep();
+        }
+
+    }
 }
 
-uint8_t weather_loop(){
+uint8_t weather_loop()
+{
     display.fillScreen(GxEPD_WHITE);
-    display.setCursor(0,50);
-    display.println("weather_loop");   
+    display.setCursor(0, 50);
+    display.println("weather_loop");
     display.println("You can customize the functionality ");
     display.update();
 
-  for (;;){
- 
-  button1.check();
-  button2.check();
-  button3.check();
+    for (;;) {
 
-    if (button3_flag)  {button3_flag = 0;}
-    if (button1_flag)  {button1_flag =0 ;return 0;}
-    if (button2_flag)  {button2_flag =0; return 0;}
-    if (button3_long_flag)  {button3_long_flag =0; EnterSleep();}
+        button1.check();
+        button2.check();
+        button3.check();
 
-  }
+        if (button3_flag)  {
+            button3_flag = 0;
+        }
+        if (button1_flag)  {
+            button1_flag = 0 ;
+            return 0;
+        }
+        if (button2_flag)  {
+            button2_flag = 0;
+            return 0;
+        }
+        if (button3_long_flag)  {
+            button3_long_flag = 0;
+            EnterSleep();
+        }
+
+    }
 }
 
-uint8_t Compass_loop(){
-      display.fillScreen(GxEPD_WHITE);
-    display.setCursor(0,50);
-    display.println("Compass_loop");   
-    display.println("You can customize the functionality ");
-    display.update();
-
- for (;;){
- 
-  button1.check();
-  button2.check();
-  button3.check();
-
-    if (button3_flag)  {button3_flag = 0;}
-    if (button1_flag)  {button1_flag =0 ;return 0;}
-    if (button2_flag)  {button2_flag =0; return 0;}
-    if (button3_long_flag)  {button3_long_flag =0; EnterSleep();}
-
-  }    
-}
-
-uint8_t Bluetooth_loop(){
-      display.fillScreen(GxEPD_WHITE);
-    display.setCursor(0,50);
-    display.println("Bluetooth_loop");   
-    display.println("You can customize the functionality ");
-    display.update();
-
- for (;;){
- 
-  button1.check();
-  button2.check();
-  button3.check();
-
-    if (button3_flag)  {button3_flag = 0;}
-    if (button1_flag)  {button1_flag =0 ;return 0;}
-    if (button2_flag)  {button2_flag =0; return 0;}
-    if (button3_long_flag)  {button3_long_flag =0; EnterSleep();}
-
-  }    
-}
-
-uint8_t WIFI_loop(){
+uint8_t Compass_loop()
+{
     display.fillScreen(GxEPD_WHITE);
-    display.setCursor(0,50);
-    display.println("WIFI_loop");   
+    display.setCursor(0, 50);
+    display.println("Compass_loop");
     display.println("You can customize the functionality ");
     display.update();
 
- for (;;){
- 
-  button1.check();
-  button2.check();
-  button3.check();
+    for (;;) {
 
-    if (button3_flag)  {button3_flag = 0;}
-    if (button1_flag)  {button1_flag =0 ;return 0;}
-    if (button2_flag)  {button2_flag =0; return 0;}
-    if (button3_long_flag)  {button3_long_flag =0; EnterSleep();}
+        button1.check();
+        button2.check();
+        button3.check();
 
-  }    
+        if (button3_flag)  {
+            button3_flag = 0;
+        }
+        if (button1_flag)  {
+            button1_flag = 0 ;
+            return 0;
+        }
+        if (button2_flag)  {
+            button2_flag = 0;
+            return 0;
+        }
+        if (button3_long_flag)  {
+            button3_long_flag = 0;
+            EnterSleep();
+        }
+
+    }
+}
+
+uint8_t Bluetooth_loop()
+{
+    display.fillScreen(GxEPD_WHITE);
+    display.setCursor(0, 50);
+    display.println("Bluetooth_loop");
+    display.println("You can customize the functionality ");
+    display.update();
+
+    for (;;) {
+
+        button1.check();
+        button2.check();
+        button3.check();
+
+        if (button3_flag)  {
+            button3_flag = 0;
+        }
+        if (button1_flag)  {
+            button1_flag = 0 ;
+            return 0;
+        }
+        if (button2_flag)  {
+            button2_flag = 0;
+            return 0;
+        }
+        if (button3_long_flag)  {
+            button3_long_flag = 0;
+            EnterSleep();
+        }
+
+    }
+}
+
+uint8_t WIFI_loop()
+{
+    display.fillScreen(GxEPD_WHITE);
+    display.setCursor(0, 50);
+    display.println("WIFI_loop");
+    display.println("You can customize the functionality ");
+    display.update();
+
+    for (;;) {
+
+        button1.check();
+        button2.check();
+        button3.check();
+
+        if (button3_flag)  {
+            button3_flag = 0;
+        }
+        if (button1_flag)  {
+            button1_flag = 0 ;
+            return 0;
+        }
+        if (button2_flag)  {
+            button2_flag = 0;
+            return 0;
+        }
+        if (button3_long_flag)  {
+            button3_long_flag = 0;
+            EnterSleep();
+        }
+
+    }
 }
 
 
@@ -489,11 +558,11 @@ bool check_button(uint8_t pin)
 
 
 /*
- __          ________       _______ _    _ ______ _____  
- \ \        / /  ____|   /\|__   __| |  | |  ____|  __ \ 
+ __          ________       _______ _    _ ______ _____
+ \ \        / /  ____|   /\|__   __| |  | |  ____|  __ \
   \ \  /\  / /| |__     /  \  | |  | |__| | |__  | |__) |
-   \ \/  \/ / |  __|   / /\ \ | |  |  __  |  __| |  _  / 
-    \  /\  /  | |____ / ____ \| |  | |  | | |____| | \ \ 
+   \ \/  \/ / |  __|   / /\ \ | |  |  __  |  __| |  _  /
+    \  /\  /  | |____ / ____ \| |  | |  | | |____| | \ \
      \/  \/   |______/_/    \_\_|  |_|  |_|______|_|  \_\
 */
 
@@ -619,7 +688,7 @@ void wifi_status(void)
         wifi_flag = 0;
     }
 
-   
+
 }
 
 void display_wifi()
@@ -645,7 +714,7 @@ void display_Battery()
     int sensorValue = analogRead(35);
     float voltage = sensorValue * (3.3 / 4096);
     delay(100);
-    voltage = (voltage*2) - 3.0;
+    voltage = (voltage * 2) - 3.0;
     int ADC_Int = (int)(voltage / 0.083);
 
     if (ADC_Int > 12) ADC_Int = 12;
@@ -661,11 +730,11 @@ void display_Battery()
 }
 
 /*
-  _______ _____ __  __ ______ 
+  _______ _____ __  __ ______
  |__   __|_   _|  \/  |  ____|
-    | |    | | | \  / | |__   
-    | |    | | | |\/| |  __|  
-    | |   _| |_| |  | | |____ 
+    | |    | | | \  / | |__
+    | |    | | | |\/| |  __|
+    | |   _| |_| |  | | |____
     |_|  |_____|_|  |_|______|
  */
 void display_time()
@@ -682,7 +751,7 @@ void display_time()
     // u8g2Fonts.println(&timeinfo, "%H:%M");
     u8g2Fonts.println(rtc.formatDateTime(PCF_TIMEFORMAT_HM));
 
-    u8g2Fonts.setCursor(50+10, 8);
+    u8g2Fonts.setCursor(50 + 10, 8);
     u8g2Fonts.setFont(u8g2_font_timB12_tr );
     u8g2Fonts.println(rtc.formatDateTime(PCF_TIMEFORMAT_YYYY_MM_DD));
     /*
@@ -692,7 +761,7 @@ void display_time()
     u8g2Fonts.print("/");
     u8g2Fonts.println(timeinfo.tm_mday);*/
 
-    u8g2Fonts.setCursor(35+10, 30);
+    u8g2Fonts.setCursor(35 + 10, 30);
     u8g2Fonts.setFont(u8g2_font_helvR10_te);
     u8g2Fonts.println(&timeinfo, "%a");
 
@@ -706,7 +775,7 @@ void display_time()
 
     // display "↑"
     u8g2Fonts.setFont(u8g2_font_cu12_t_symbols);
-    u8g2Fonts.drawGlyph(103,48,8593);
+    u8g2Fonts.drawGlyph(103, 48, 8593);
 
 }
 
@@ -730,134 +799,137 @@ bool printLocalTime()
             ESP.restart();
         }
     }
-    
+
     rtc.getDayOfWeek(timeinfo.tm_mday,  timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
     rtc.setDateTime(timeinfo.tm_year + 1900, timeinfo.tm_mon + 1, timeinfo.tm_mday, timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
 
     return true;
-    
+
 
 }
 
 
-/* 
-    ____  __  __  _____ 
+/*
+    ____  __  __  _____
   / __ \|  \/  |/ ____|
- | |  | | \  / | |     
- | |  | | |\/| | |     
- | |__| | |  | | |____ 
+ | |  | | \  / | |
+ | |  | | |\/| | |
+ | |__| | |  | | |____
   \___\_\_|  |_|\_____|
 */
 const char bearings[16][3] =  {
-        {' ', ' ', 'W'},
-        {'W', 'S', 'W'},
-        {' ', 'S', 'W'},
-        {'S', 'S', 'W'},
-        {' ', ' ', 'S'},
-        {'S', 'S', 'E'},
-        {' ', 'S', 'E'},
-        {'E', 'S', 'E'},
-        {' ', ' ', 'E'},
-        {'E', 'N', 'E'},
-        {' ', 'N', 'E'},
-        {'N', 'N', 'E'},
-        {' ', ' ', 'N'},
-        {'N', 'N', 'W'},
-        {' ', 'N', 'W'},
-        {'W', 'N', 'W'},
-    };
+    {' ', ' ', 'W'},
+    {'W', 'S', 'W'},
+    {' ', 'S', 'W'},
+    {'S', 'S', 'W'},
+    {' ', ' ', 'S'},
+    {'S', 'S', 'E'},
+    {' ', 'S', 'E'},
+    {'E', 'S', 'E'},
+    {' ', ' ', 'E'},
+    {'E', 'N', 'E'},
+    {' ', 'N', 'E'},
+    {'N', 'N', 'E'},
+    {' ', ' ', 'N'},
+    {'N', 'N', 'W'},
+    {' ', 'N', 'W'},
+    {'W', 'N', 'W'},
+};
 
-void QMC_setup(){
+void QMC_setup()
+{
 
-  compass.init();
-  compass.setCalibration(-268, 1680, 0, 2005, 0, 2052);
+    compass.init();
+    compass.setCalibration(-268, 1680, 0, 2005, 0, 2052);
 }
 
-void QMC_main(){
-   
-  compass.read();
+void QMC_main()
+{
 
-  // Return XYZ readings
-  int x = compass.getX();
-  int y = compass.getY();
-  int z = compass.getZ();
-  
-  Serial.print("X: ");
-  Serial.print(x);
-  Serial.print(" Y: ");
-  Serial.print(y);
-  Serial.print(" Z: ");
-  Serial.print(z);
-  Serial.println();
+    compass.read();
 
- changed = false;
+    // Return XYZ readings
+    int x = compass.getX();
+    int y = compass.getY();
+    int z = compass.getZ();
 
-  if(x < calibrationData[0][0]) {
-    calibrationData[0][0] = x;
-    changed = true;
-  }
-  if(x > calibrationData[0][1]) {
-    calibrationData[0][1] = x;
-    changed = true;
-  }
+    Serial.print("X: ");
+    Serial.print(x);
+    Serial.print(" Y: ");
+    Serial.print(y);
+    Serial.print(" Z: ");
+    Serial.print(z);
+    Serial.println();
 
-  if(y < calibrationData[1][0]) {
-    calibrationData[1][0] = y;
-    changed = true;
-  }
-  if(y > calibrationData[1][1]) {
-    calibrationData[1][1] = y;
-    changed = true;
-  }
+    changed = false;
 
-  if(z < calibrationData[2][0]) {
-    calibrationData[2][0] = z;
-    changed = true;
-  }
-  if(z > calibrationData[2][1]) {
-    calibrationData[2][1] = z;
-    changed = true;
-  }
-  
-  compass.setCalibration(calibrationData[0][0], calibrationData[0][1], calibrationData[1][0], calibrationData[1][1], calibrationData[2][0],calibrationData[2][1]);
-
-
-  
-  int a = compass.getAzimuth();
-  int b = compass.getBearing(a);
-
-
-  myArray[0] =bearings[b][0];
-  myArray[1] =bearings[b][1];
-  myArray[2] =bearings[b][2];
-/*
-  Serial.print(myArray[0]);
-  Serial.print(myArray[1]);
-  Serial.print(myArray[2]);
-  Serial.println();
-*/
-  
- 
-  }
-
-
-/*
-  ____  __  __ _____  
- |  _ \|  \/  |  __ \ 
- | |_) | \  / | |__) |
- |  _ <| |\/| |  ___/ 
- | |_) | |  | | |     
- |____/|_|  |_|_|    
-*/
-void bma_irq(){
-        // Set interrupt to set irq value to true
-        BMA_IRQ = true;
+    if (x < calibrationData[0][0]) {
+        calibrationData[0][0] = x;
+        changed = true;
     }
+    if (x > calibrationData[0][1]) {
+        calibrationData[0][1] = x;
+        changed = true;
+    }
+
+    if (y < calibrationData[1][0]) {
+        calibrationData[1][0] = y;
+        changed = true;
+    }
+    if (y > calibrationData[1][1]) {
+        calibrationData[1][1] = y;
+        changed = true;
+    }
+
+    if (z < calibrationData[2][0]) {
+        calibrationData[2][0] = z;
+        changed = true;
+    }
+    if (z > calibrationData[2][1]) {
+        calibrationData[2][1] = z;
+        changed = true;
+    }
+
+    compass.setCalibration(calibrationData[0][0], calibrationData[0][1], calibrationData[1][0], calibrationData[1][1], calibrationData[2][0], calibrationData[2][1]);
+
+
+
+    int a = compass.getAzimuth();
+    int b = compass.getBearing(a);
+
+
+    myArray[0] = bearings[b][0];
+    myArray[1] = bearings[b][1];
+    myArray[2] = bearings[b][2];
+    /*
+      Serial.print(myArray[0]);
+      Serial.print(myArray[1]);
+      Serial.print(myArray[2]);
+      Serial.println();
+    */
+
+
+}
+
+
+/*
+  ____  __  __ _____
+ |  _ \|  \/  |  __ \
+ | |_) | \  / | |__) |
+ |  _ <| |\/| |  ___/
+ | |_) | |  | | |
+ |____/|_|  |_|_|
+*/
+void bma_irq()
+{
+    // Set interrupt to set irq value to true
+    BMA_IRQ = true;
+}
 
 void BMA_setup()
 {
     pinMode(BMP_INT1, INPUT_PULLUP);
-    attachInterrupt(BMP_INT1,bma_irq, RISING); //Select the interrupt mode according to the actual circuit
+    attachInterrupt(BMP_INT1, bma_irq, RISING); //Select the interrupt mode according to the actual circuit
 
 
 
@@ -900,7 +972,8 @@ void BMA_setup()
 
 }
 
-void BMA_main(){
+void BMA_main()
+{
     if (BMA_IRQ) {
         BMA_IRQ = false;
 
@@ -924,8 +997,8 @@ void BMA_main(){
             }
             counter_IRQ++;
             Serial.print("step counter out"); Serial.println(step_out);
-            //display.println(step_out); 
-           // display.updateWindow(box_x, box_y, box_w, box_h, true);
+            //display.println(step_out);
+            // display.updateWindow(box_x, box_y, box_w, box_h, true);
 
         }
 
@@ -1020,7 +1093,7 @@ void BMA4_INT_Configuration()
 
 
 
-/* __  __ ______ _   _ _    _ 
+/* __  __ ______ _   _ _    _
  |  \/  |  ____| \ | | |  | |
  | \  / | |__  |  \| | |  | |
  | |\/| |  __| | . ` | |  | |
@@ -1029,7 +1102,7 @@ void BMA4_INT_Configuration()
 */
 uint8_t meun_loop()
 {
-    first =true;
+    first = true;
     display.setTextColor(GxEPD_BLACK);
     u8g2Fonts.setFontMode(1);                           // use u8g2 transparent mode (this is default)
     u8g2Fonts.setFontDirection(1);                      // left to right (this is default)
@@ -1041,156 +1114,138 @@ uint8_t meun_loop()
     button3_flag = 0;
     button1_flag = 0;
     button2_flag = 0;
-    for (;;)
-    {
+    for (;;) {
 
-  button1.check();
-  button2.check();
-  button3.check();
+        button1.check();
+        button2.check();
+        button3.check();
 
-    display.fillScreen(GxEPD_WHITE);
-    draw(&destination_state); 
-    u8g2Fonts.setFont(u8g2_font_helvB10_tr);  
-    u8g2Fonts.setCursor(8,0);
-    u8g2Fonts.print(menu_entry_list[destination_state.position].name);
-   if(first||meun_update_flag){
-    display.update();
-    first=false;
-    meun_update_flag =false;
-   }
+        display.fillScreen(GxEPD_WHITE);
+        draw(&destination_state);
+        u8g2Fonts.setFont(u8g2_font_helvB10_tr);
+        u8g2Fonts.setCursor(8, 0);
+        u8g2Fonts.print(menu_entry_list[destination_state.position].name);
+        if (first || meun_update_flag) {
+            display.update();
+            first = false;
+            meun_update_flag = false;
+        }
 
-  BMA_main();
+        BMA_main();
 
-    if (button1_flag  == 1 )
-    {
-     Serial.println("button1_flag");
-     to_left(&destination_state);
-     draw(&current_state);  
-     meun_update_flag=true;
-     button1_flag  = 0;
-    }
-      
-    if ( button2_flag == 1 )
-    {
-     Serial.println("button2_flag");
-     to_right(&destination_state);
-     draw(&current_state);  
-     meun_update_flag=true;
-     button2_flag  = 0;
-    }
-      
-    if ( button3_flag == 1 )
-    {
-     Serial.println(destination_state.position);
-     button3_flag  = 0;
-     return destination_state.position; 
+        if (button1_flag  == 1 ) {
+            Serial.println("button1_flag");
+            to_left(&destination_state);
+            draw(&current_state);
+            meun_update_flag = true;
+            button1_flag  = 0;
+        }
+
+        if ( button2_flag == 1 ) {
+            Serial.println("button2_flag");
+            to_right(&destination_state);
+            draw(&current_state);
+            meun_update_flag = true;
+            button2_flag  = 0;
+        }
+
+        if ( button3_flag == 1 ) {
+            Serial.println(destination_state.position);
+            button3_flag  = 0;
+            return destination_state.position;
+        }
+
+        if ( button3_long_flag == 1 ) {
+            button3_long_flag  = 0;
+            EnterSleep();
+        }
+
     }
 
-    if ( button3_long_flag == 1 )
-    {
-     button3_long_flag  = 0;
-     EnterSleep();
-    }
- 
-    }
-  
- 
+
 }
 
 void draw(struct menu_state *state)
 {
-   
-  int16_t x;
-  uint8_t i;
-  x = state->menu_start;
 
-  i = 0;
-  while( menu_entry_list[i].icon > 0 )  
-  {
- 
-    if (x >=(-ICON_WIDTH)&& x < GxGDGDEW0102T4_HEIGHT  ) 
-    {
+    int16_t x;
+    uint8_t i;
+    x = state->menu_start;
 
-      u8g2Fonts.setFont(menu_entry_list[i].font);
-      u8g2Fonts.drawGlyph(ICON_Y-50,x-12 , menu_entry_list[i].icon);
-                   
+    i = 0;
+    while ( menu_entry_list[i].icon > 0 ) {
+
+        if (x >= (-ICON_WIDTH) && x < GxGDGDEW0102T4_HEIGHT  ) {
+
+            u8g2Fonts.setFont(menu_entry_list[i].font);
+            u8g2Fonts.drawGlyph(ICON_Y - 50, x - 12, menu_entry_list[i].icon);
+
+        }
+
+        i++;
+        x += ICON_WIDTH + ICON_GAP;
     }
-    
-    i++;
-    x += ICON_WIDTH + ICON_GAP;
-  }
-  display.drawRect(ICON_Y-ICON_HEIGHT-1,state->frame_position-1-13, ICON_WIDTH+2, ICON_WIDTH+2, GxEPD_BLACK);
-  display.drawRect(ICON_Y-ICON_HEIGHT-2,state->frame_position-2-13, ICON_WIDTH+4, ICON_WIDTH+4, GxEPD_BLACK);
-  display.drawRect(ICON_Y-ICON_HEIGHT-3, state->frame_position-3-13, ICON_WIDTH+6, ICON_WIDTH+6, GxEPD_BLACK);
+    display.drawRect(ICON_Y - ICON_HEIGHT - 1, state->frame_position - 1 - 13, ICON_WIDTH + 2, ICON_WIDTH + 2, GxEPD_BLACK);
+    display.drawRect(ICON_Y - ICON_HEIGHT - 2, state->frame_position - 2 - 13, ICON_WIDTH + 4, ICON_WIDTH + 4, GxEPD_BLACK);
+    display.drawRect(ICON_Y - ICON_HEIGHT - 3, state->frame_position - 3 - 13, ICON_WIDTH + 6, ICON_WIDTH + 6, GxEPD_BLACK);
 
 }
 
 void to_right(struct menu_state *state)
 {
- 
-  if ( menu_entry_list[state->position+1].font != NULL )
-  {
 
-    if ( (int16_t)state->frame_position+ 2*(int16_t)ICON_WIDTH + (int16_t)ICON_BGAP < (int16_t)GxGDGDEW0102T4_HEIGHT )
-    {
-      state->position++;
-      state->frame_position += ICON_WIDTH + (int16_t)ICON_GAP;
-    }
-    else
-    {
-      state->position++;      
-      state->frame_position = (int16_t)GxGDGDEW0102T4_HEIGHT - (int16_t)ICON_WIDTH - (int16_t)ICON_BGAP;
-      state->menu_start = state->frame_position - state->position*((int16_t)ICON_WIDTH + (int16_t)ICON_GAP);
-      delay(50);
+    if ( menu_entry_list[state->position + 1].font != NULL ) {
 
+        if ( (int16_t)state->frame_position + 2 * (int16_t)ICON_WIDTH + (int16_t)ICON_BGAP < (int16_t)GxGDGDEW0102T4_HEIGHT ) {
+            state->position++;
+            state->frame_position += ICON_WIDTH + (int16_t)ICON_GAP;
+        } else {
+            state->position++;
+            state->frame_position = (int16_t)GxGDGDEW0102T4_HEIGHT - (int16_t)ICON_WIDTH - (int16_t)ICON_BGAP;
+            state->menu_start = state->frame_position - state->position * ((int16_t)ICON_WIDTH + (int16_t)ICON_GAP);
+            delay(50);
+
+        }
     }
-  }
 }
 
 void to_left(struct menu_state *state)
 {
-  if ( state->position > 0 )
-  {
-    if ( (int16_t)state->frame_position >= (int16_t)ICON_BGAP+(int16_t)ICON_WIDTH+ (int16_t)ICON_GAP )
-    {
-      Serial.println("to_left1");
-      state->position--;
-      state->frame_position -= ICON_WIDTH + (int16_t)ICON_GAP;
-    }    
-    else
-    {
-      Serial.println("to_left2");
-      state->position--; 
-      state->frame_position = ICON_BGAP;
-      state->menu_start = state->frame_position - state->position*((int16_t)ICON_WIDTH + (int16_t)ICON_GAP);
-      
+    if ( state->position > 0 ) {
+        if ( (int16_t)state->frame_position >= (int16_t)ICON_BGAP + (int16_t)ICON_WIDTH + (int16_t)ICON_GAP ) {
+            Serial.println("to_left1");
+            state->position--;
+            state->frame_position -= ICON_WIDTH + (int16_t)ICON_GAP;
+        } else {
+            Serial.println("to_left2");
+            state->position--;
+            state->frame_position = ICON_BGAP;
+            state->menu_start = state->frame_position - state->position * ((int16_t)ICON_WIDTH + (int16_t)ICON_GAP);
+
+        }
     }
-  }
 }
 
 uint8_t towards_int16(int16_t *current, int16_t dest)
 {
-  if ( *current < dest )
-  {
-    (*current)++;
-    return 1;
-  }
-  else if ( *current > dest )
-  {
-    (*current)--;
-    return 1;
-  }
-  return 0;
+    if ( *current < dest ) {
+        (*current)++;
+        return 1;
+    } else if ( *current > dest ) {
+        (*current)--;
+        return 1;
+    }
+    return 0;
 }
 
 uint8_t towards(struct menu_state *current, struct menu_state *destination)
 {
-  uint8_t r = 0;
-  r |= towards_int16( &(current->frame_position), destination->frame_position);
-  r |= towards_int16( &(current->frame_position), destination->frame_position);
-  r |= towards_int16( &(current->menu_start), destination->menu_start);
-  r |= towards_int16( &(current->menu_start), destination->menu_start);
-  return r;
+    uint8_t r = 0;
+    r |= towards_int16( &(current->frame_position), destination->frame_position);
+    r |= towards_int16( &(current->frame_position), destination->frame_position);
+    r |= towards_int16( &(current->menu_start), destination->menu_start);
+    r |= towards_int16( &(current->menu_start), destination->menu_start);
+    return r;
 }
 
 
@@ -1205,8 +1260,8 @@ void EnterSleep()
     Serial.println("EnterSleep");
     display.fillScreen(GxEPD_WHITE);
     u8g2Fonts.setFont(u8g2_font_open_iconic_all_4x_t);
-    u8g2Fonts.drawGlyph(65,30, 235);
-    //display.print("EnterSleep");   
+    u8g2Fonts.drawGlyph(65, 30, 235);
+    //display.print("EnterSleep");
     display.update();
     delay(2000);
     esp_sleep_enable_ext1_wakeup(((uint64_t)(((uint64_t)1) << BUTTON_1)), ESP_EXT1_WAKEUP_ALL_LOW);
@@ -1228,39 +1283,40 @@ void LilyGo_logo(void)
 
 
 // The event handler for both buttons.
-void handleEvent(AceButton* button, uint8_t eventType, uint8_t buttonState) {
+void handleEvent(AceButton *button, uint8_t eventType, uint8_t buttonState)
+{
 
-  // Print out a message for all events, for both buttons.
-  Serial.print(F("handleEvent(): pin: "));
-  Serial.print(button->getPin());
-  Serial.print(F("; eventType: "));
-  Serial.print(eventType);
-  Serial.print(F("; buttonState: "));
-  Serial.println(buttonState);
+    // Print out a message for all events, for both buttons.
+    Serial.print(F("handleEvent(): pin: "));
+    Serial.print(button->getPin());
+    Serial.print(F("; eventType: "));
+    Serial.print(eventType);
+    Serial.print(F("; buttonState: "));
+    Serial.println(buttonState);
 
 
-  switch (eventType) {
+    switch (eventType) {
 
     case AceButton::kEventReleased:
-      if (button->getPin() == BUTTON_1) {
-       // Serial.println(F("BUTTON_1 "));
-        button1_flag=1;
-      }
-      if (button->getPin() == BUTTON_2) {
-       // Serial.println(F("BUTTON_2 "));
-         button2_flag=1;
-      }
-      if (button->getPin() == BUTTON_3) {
-     //   Serial.println(F("BUTTON_3 "));
-         button3_flag=1;
-      }
-      break;
+        if (button->getPin() == BUTTON_1) {
+            // Serial.println(F("BUTTON_1 "));
+            button1_flag = 1;
+        }
+        if (button->getPin() == BUTTON_2) {
+            // Serial.println(F("BUTTON_2 "));
+            button2_flag = 1;
+        }
+        if (button->getPin() == BUTTON_3) {
+            //   Serial.println(F("BUTTON_3 "));
+            button3_flag = 1;
+        }
+        break;
     case AceButton::kEventLongPressed:
-      if (button->getPin() == BUTTON_3) {
-      //  Serial.println(F("BUTTON_1 EventLongPressed!"));
-          button3_long_flag=1;
-      } 
-      break;
-  }
+        if (button->getPin() == BUTTON_3) {
+            //  Serial.println(F("BUTTON_1 EventLongPressed!"));
+            button3_long_flag = 1;
+        }
+        break;
+    }
 }
 

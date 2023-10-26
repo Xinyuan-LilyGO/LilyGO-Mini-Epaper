@@ -10,12 +10,20 @@ String countryCode = "**";
 
  This example code is in the public domain.
  */
+// According to the board, cancel the corresponding macro definition
+// https://www.lilygo.cc/products/mini-e-paper-core , esp32picod4
+// #define LILYGO_MINI_EPAPER_ESP32
+// esp32s3-fn4r2
+// #define LILYGO_MINI_EPAPER_ESP32S3
 
+#if !defined(LILYGO_MINI_EPAPER_ESP32S3)  && !defined(LILYGO_MINI_EPAPER_ESP32)
+// 请在草图上方选择对应的目标板子名称,将它取消注释.
+#error "Please select the corresponding target board name above the sketch and uncomment it."
+#endif
 
 #define TIME_ZONE  8
 
 
-#define LILYGO_T5_V102
 #include <FunctionalInterrupt.h>
 #include "battery_index.h"
 #include <boards.h>
@@ -41,10 +49,14 @@ String countryCode = "**";
 #include "pcf8563.h"
 #include "bma423.h"
 #include <QMC5883LCompass.h>
+#include <AceButton.h>
+using namespace ace_button;
 
+// const char *ssid = "REPLACE_WITH_YOUR_SSID";
+// const char *password = "REPLACE_WITH_YOUR_PASSWORD";
 
-const char* ssid = "REPLACE_WITH_YOUR_SSID";
-const char* password = "REPLACE_WITH_YOUR_PASSWORD";
+const char *ssid = "LilyGo-AABB";
+const char *password = "xinyuandianzi";
 
 // Your Domain name with URL path or IP address with path
 String openWeatherMapApiKey = "REPLACE_WITH_YOUR_OPEN_WEATHER_MAP_API_KEY";
@@ -73,32 +85,28 @@ const int   daylightOffset_sec = 3600 * (TIME_ZONE - 4);
 GxIO_Class io(SPI,  EPD_CS, EPD_DC,  EPD_RSET);
 GxEPD_Class display(io, EPD_RSET, EPD_BUSY);
 U8G2_FOR_ADAFRUIT_GFX u8g2Fonts;
-
 struct tm timeinfo;
 String current_weather;
-
 PCF8563_Class rtc;
-
 QMC5883LCompass compass;
 int calibrationData[3][2];
 bool changed = false;
 char myArray[3];
 uint32_t   QMC_last = 0;
-
-
 struct bma4_dev bma;
 struct bma4_accel sens_data;
 struct bma4_accel_config accel_conf;
 int8_t rslt;
-
 /* Variable to get the step counter output */
 uint32_t step_out = 0;
-
 /* Variable to get the interrupt status  */
 uint16_t int_status = 0;
-
 bool BMA_IRQ = false;
-uint16_t counter_IRQ=0;
+uint16_t counter_IRQ = 0;
+AceButton button1(BUTTON_1);
+AceButton button2(BUTTON_2);
+AceButton button3((uint8_t)(BUTTON_3));
+
 
 uint16_t writeRegister(uint8_t address, uint8_t reg, uint8_t *data, uint16_t len);
 uint16_t readRegister(uint8_t address, uint8_t reg, uint8_t *data, uint16_t len);
@@ -121,54 +129,40 @@ void display_wifi();
 void EnterSleep();
 
 
-bool button3_flag = 0;
-bool button1_flag = 0;
-bool button2_flag = 0;
-
-class Button
-{
-public:
-
-    Button(uint8_t reqPin) : PIN(reqPin)
-    {
-        pinMode(PIN, INPUT_PULLUP);
-        attachInterrupt(PIN, std::bind(&Button::isr, this), FALLING);
-    };
-    ~Button()
-    {
-        detachInterrupt(PIN);
-    }
-
-    void IRAM_ATTR isr()
-    {
-        numberKeyPresses += 1;
-        pressed = true;
-    }
-
-
-    void checkPressed()
-    {
-        if (pressed) {
-            delay(300);//flutter-free
-            if (PIN == BUTTON_3) button3_flag = 1;
-            else if (PIN == BUTTON_1) button1_flag = 1;
-            else if (PIN == BUTTON_2) button2_flag = 1;
-            pressed = false;
-        }
-    }
-
-private:
-    const uint8_t PIN;
-    volatile uint32_t numberKeyPresses;
-    volatile bool pressed;
-};
-
-Button button3(BUTTON_3);
-
 void button3_callback(void);
 void button1_callback(void);
 void button2_callback(void);
 bool check_button(uint8_t pin);
+
+
+// The event handler for both buttons.
+void handleEvent(AceButton *button, uint8_t eventType, uint8_t buttonState)
+{
+    // Print out a message for all events, for both buttons.
+    Serial.print(F("handleEvent(): pin: "));
+    Serial.print(button->getPin());
+    Serial.print(F("; eventType: "));
+    Serial.print(eventType);
+    Serial.print(F("; buttonState: "));
+    Serial.println(buttonState);
+
+    switch (eventType) {
+    case AceButton::kEventReleased:
+        if (button->getPin() == BUTTON_1) {
+            button1_callback();
+        }
+        if (button->getPin() == BUTTON_2) {
+            button2_callback();
+        }
+        if (button->getPin() == BUTTON_3) {
+            button3_callback();
+        }
+        break;
+    case AceButton::kEventLongPressed:
+
+        break;
+    }
+}
 
 void setup(void)
 {
@@ -176,6 +170,15 @@ void setup(void)
     Serial.begin(115200);
     Serial.println();
     Serial.println("setup");
+
+
+    ButtonConfig *buttonConfig = ButtonConfig::getSystemButtonConfig();
+    buttonConfig->setEventHandler(handleEvent);
+    buttonConfig->setFeature(ButtonConfig::kFeatureClick);
+    buttonConfig->setFeature(ButtonConfig::kFeatureDoubleClick);
+    buttonConfig->setFeature(ButtonConfig::kFeatureLongPress);
+    buttonConfig->setFeature(ButtonConfig::kFeatureRepeatPress);
+
 
     SPI.begin(EPD_SCLK, EPD_MISO, EPD_MOSI);
     display.init(); // enable diagnostic output on Serial
@@ -208,7 +211,7 @@ void setup(void)
 
     while (!printLocalTime()); //get time
 
- 
+
     get_weather();
 
     //disconnect WiFi as it's no longer needed
@@ -217,8 +220,8 @@ void setup(void)
     WiFi.disconnect();
 
 
-    pinMode(POWER_ENABLE, OUTPUT);
-    digitalWrite(POWER_ENABLE, HIGH);
+    pinMode(EPD_POWER_ENABLE, OUTPUT);
+    digitalWrite(EPD_POWER_ENABLE, HIGH);
 
     pinMode(BUTTON_1, INPUT_PULLUP);
     pinMode(BUTTON_2, INPUT_PULLUP);
@@ -249,7 +252,7 @@ void loop()
         last = millis();
     }
 
-   if(millis() - QMC_last > 1000) {
+    if (millis() - QMC_last > 1000) {
         QMC_main();
         display.fillRect(105, 55, 10, 30, GxEPD_WHITE);
         u8g2Fonts.setFont(u8g2_font_timB08_tr);
@@ -257,7 +260,7 @@ void loop()
         u8g2Fonts.print(myArray[0]);
         u8g2Fonts.print(myArray[1]);
         u8g2Fonts.print(myArray[2]);
-        display.updateWindow(105, 55, 10, 30,true);
+        display.updateWindow(105, 55, 10, 30, true);
         QMC_last = millis();
     }
 
@@ -284,20 +287,17 @@ void loop()
             }
             counter_IRQ++;
             Serial.print("step counter out"); Serial.println(step_out);//输出步数
-            //display.println(step_out); 
-           // display.updateWindow(box_x, box_y, box_w, box_h, true);
+            //display.println(step_out);
+            // display.updateWindow(box_x, box_y, box_w, box_h, true);
 
         }
 
     }
 
-    button3.checkPressed();
+    button1.check();
+    button2.check();
+    button3.check();
 
-    if (button3_flag == 1)button3_callback();
-    else if (check_button(BUTTON_1))button1_callback();
-    else if (check_button(BUTTON_2))button2_callback();
-    //Serial.println(rtc.formatDateTime(PCF_TIMEFORMAT_HM));
-    //Serial.println(rtc.formatDateTime(PCF_TIMEFORMAT_YYYY_MM_DD));
 
 }
 
@@ -351,7 +351,6 @@ void button3_callback(void)
         wifi_flag = 0;
     }
 
-    button3_flag = 0;//Clear flag bit
 }
 
 //button1 callback function
@@ -359,22 +358,18 @@ void button1_callback(void)
 {
     Serial.print("button1_callback");
 
-/*
-    display.setRotation(3);
-    display.fillScreen(GxEPD_WHITE);
-    u8g2Fonts.setFont(u8g2_font_helvR10_te  );
-    u8g2Fonts.setCursor(10, 0);    // start writing at this position
-    u8g2Fonts.print("EnterSleep");
-    u8g2Fonts.setFont(u8g2_font_open_iconic_embedded_8x_t); // select u8g2 font from here: https://github.com/olikraus/u8g2/wiki/fntlistall
-    u8g2Fonts.setCursor(30, 10);    // start writing at this position  u8g2Fonts.setCursor(110, 5);
-    u8g2Fonts.print("N");
-    display.update();
-    u8g2Fonts.print("button1_callback");
-
-
-
-    button1_flag = 0;//Clear flag bit
-    EnterSleep();*/
+    /*
+        display.setRotation(3);
+        display.fillScreen(GxEPD_WHITE);
+        u8g2Fonts.setFont(u8g2_font_helvR10_te  );
+        u8g2Fonts.setCursor(10, 0);    // start writing at this position
+        u8g2Fonts.print("EnterSleep");
+        u8g2Fonts.setFont(u8g2_font_open_iconic_embedded_8x_t); // select u8g2 font from here: https://github.com/olikraus/u8g2/wiki/fntlistall
+        u8g2Fonts.setCursor(30, 10);    // start writing at this position  u8g2Fonts.setCursor(110, 5);
+        u8g2Fonts.print("N");
+        display.update();
+        u8g2Fonts.print("button1_callback");
+        EnterSleep();*/
 }
 
 //button2 callback function
@@ -386,7 +381,6 @@ void button2_callback(void)
     u8g2Fonts.print("button2_callback");
     display.update();
 
-    button2_flag = 0;//Clear flag bit
 }
 
 void display_wifi()
@@ -412,7 +406,7 @@ void display_Battery()
     int sensorValue = analogRead(35);
     float voltage = sensorValue * (3.3 / 4096);
     delay(100);
-    voltage = (voltage*2) - 3.0;
+    voltage = (voltage * 2) - 3.0;
     int ADC_Int = (int)(voltage / 0.083);
 
     if (ADC_Int > 12) ADC_Int = 12;
@@ -429,11 +423,11 @@ void display_Battery()
 
 
 /*
- __          ________       _______ _    _ ______ _____  
- \ \        / /  ____|   /\|__   __| |  | |  ____|  __ \ 
+ __          ________       _______ _    _ ______ _____
+ \ \        / /  ____|   /\|__   __| |  | |  ____|  __ \
   \ \  /\  / /| |__     /  \  | |  | |__| | |__  | |__) |
-   \ \/  \/ / |  __|   / /\ \ | |  |  __  |  __| |  _  / 
-    \  /\  /  | |____ / ____ \| |  | |  | | |____| | \ \ 
+   \ \/  \/ / |  __|   / /\ \ | |  |  __  |  __| |  _  /
+    \  /\  /  | |____ / ____ \| |  | |  | | |____| | \ \
      \/  \/   |______/_/    \_\_|  |_|  |_|______|_|  \_\
 */
 
@@ -522,11 +516,11 @@ String httpGETRequest(const char *serverName)
 
 
 /*
-  _______ _____ __  __ ______ 
+  _______ _____ __  __ ______
  |__   __|_   _|  \/  |  ____|
-    | |    | | | \  / | |__   
-    | |    | | | |\/| |  __|  
-    | |   _| |_| |  | | |____ 
+    | |    | | | \  / | |__
+    | |    | | | |\/| |  __|
+    | |   _| |_| |  | | |____
     |_|  |_____|_|  |_|______|
  */
 void display_time()
@@ -543,7 +537,7 @@ void display_time()
     // u8g2Fonts.println(&timeinfo, "%H:%M");
     u8g2Fonts.println(rtc.formatDateTime(PCF_TIMEFORMAT_HM));
 
-    u8g2Fonts.setCursor(50+10, 10);
+    u8g2Fonts.setCursor(50 + 10, 10);
     u8g2Fonts.setFont(u8g2_font_timB12_tr );
     u8g2Fonts.println(rtc.formatDateTime(PCF_TIMEFORMAT_YYYY_MM_DD));
     /*
@@ -553,7 +547,7 @@ void display_time()
     u8g2Fonts.print("/");
     u8g2Fonts.println(timeinfo.tm_mday);*/
 
-    u8g2Fonts.setCursor(35+10, 30);
+    u8g2Fonts.setCursor(35 + 10, 30);
     u8g2Fonts.setFont(u8g2_font_helvR10_te);
     u8g2Fonts.println(&timeinfo, "%a");
 
@@ -567,7 +561,7 @@ void display_time()
 
     // display "↑"
     u8g2Fonts.setFont(u8g2_font_cu12_t_symbols);
-    u8g2Fonts.drawGlyph(103,48,8593);
+    u8g2Fonts.drawGlyph(103, 48, 8593);
 
 }
 
@@ -591,119 +585,122 @@ bool printLocalTime()
             ESP.restart();
         }
     }
-    
+
     rtc.getDayOfWeek(timeinfo.tm_mday,  timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
     rtc.setDateTime(timeinfo.tm_year + 1900, timeinfo.tm_mon + 1, timeinfo.tm_mday, timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
 
     return true;
-    
+
 
 }
 
 
 //QMC
 const char bearings[16][3] =  {
-        {' ', ' ', 'W'},
-        {'W', 'S', 'W'},
-        {' ', 'S', 'W'},
-        {'S', 'S', 'W'},
-        {' ', ' ', 'S'},
-        {'S', 'S', 'E'},
-        {' ', 'S', 'E'},
-        {'E', 'S', 'E'},
-        {' ', ' ', 'E'},
-        {'E', 'N', 'E'},
-        {' ', 'N', 'E'},
-        {'N', 'N', 'E'},
-        {' ', ' ', 'N'},
-        {'N', 'N', 'W'},
-        {' ', 'N', 'W'},
-        {'W', 'N', 'W'},
-    };
+    {' ', ' ', 'W'},
+    {'W', 'S', 'W'},
+    {' ', 'S', 'W'},
+    {'S', 'S', 'W'},
+    {' ', ' ', 'S'},
+    {'S', 'S', 'E'},
+    {' ', 'S', 'E'},
+    {'E', 'S', 'E'},
+    {' ', ' ', 'E'},
+    {'E', 'N', 'E'},
+    {' ', 'N', 'E'},
+    {'N', 'N', 'E'},
+    {' ', ' ', 'N'},
+    {'N', 'N', 'W'},
+    {' ', 'N', 'W'},
+    {'W', 'N', 'W'},
+};
 
-void QMC_setup(){
+void QMC_setup()
+{
 
-  compass.init();
-  compass.setCalibration(-268, 1680, 0, 2005, 0, 2052);
+    compass.init();
+    compass.setCalibration(-268, 1680, 0, 2005, 0, 2052);
 }
 
-void QMC_main(){
-   
-  compass.read();
+void QMC_main()
+{
 
-  // Return XYZ readings
-  int x = compass.getX();
-  int y = compass.getY();
-  int z = compass.getZ();
-  
-  Serial.print("X: ");
-  Serial.print(x);
-  Serial.print(" Y: ");
-  Serial.print(y);
-  Serial.print(" Z: ");
-  Serial.print(z);
-  Serial.println();
+    compass.read();
 
- changed = false;
+    // Return XYZ readings
+    int x = compass.getX();
+    int y = compass.getY();
+    int z = compass.getZ();
 
-  if(x < calibrationData[0][0]) {
-    calibrationData[0][0] = x;
-    changed = true;
-  }
-  if(x > calibrationData[0][1]) {
-    calibrationData[0][1] = x;
-    changed = true;
-  }
+    Serial.print("X: ");
+    Serial.print(x);
+    Serial.print(" Y: ");
+    Serial.print(y);
+    Serial.print(" Z: ");
+    Serial.print(z);
+    Serial.println();
 
-  if(y < calibrationData[1][0]) {
-    calibrationData[1][0] = y;
-    changed = true;
-  }
-  if(y > calibrationData[1][1]) {
-    calibrationData[1][1] = y;
-    changed = true;
-  }
+    changed = false;
 
-  if(z < calibrationData[2][0]) {
-    calibrationData[2][0] = z;
-    changed = true;
-  }
-  if(z > calibrationData[2][1]) {
-    calibrationData[2][1] = z;
-    changed = true;
-  }
-  
-  compass.setCalibration(calibrationData[0][0], calibrationData[0][1], calibrationData[1][0], calibrationData[1][1], calibrationData[2][0],calibrationData[2][1]);
+    if (x < calibrationData[0][0]) {
+        calibrationData[0][0] = x;
+        changed = true;
+    }
+    if (x > calibrationData[0][1]) {
+        calibrationData[0][1] = x;
+        changed = true;
+    }
 
+    if (y < calibrationData[1][0]) {
+        calibrationData[1][0] = y;
+        changed = true;
+    }
+    if (y > calibrationData[1][1]) {
+        calibrationData[1][1] = y;
+        changed = true;
+    }
 
-  
-  int a = compass.getAzimuth();
-  int b = compass.getBearing(a);
+    if (z < calibrationData[2][0]) {
+        calibrationData[2][0] = z;
+        changed = true;
+    }
+    if (z > calibrationData[2][1]) {
+        calibrationData[2][1] = z;
+        changed = true;
+    }
+
+    compass.setCalibration(calibrationData[0][0], calibrationData[0][1], calibrationData[1][0], calibrationData[1][1], calibrationData[2][0], calibrationData[2][1]);
 
 
-  myArray[0] =bearings[b][0];
-  myArray[1] =bearings[b][1];
-  myArray[2] =bearings[b][2];
-/*
-  Serial.print(myArray[0]);
-  Serial.print(myArray[1]);
-  Serial.print(myArray[2]);
-  Serial.println();
-*/
-  
- 
-  }
+
+    int a = compass.getAzimuth();
+    int b = compass.getBearing(a);
+
+
+    myArray[0] = bearings[b][0];
+    myArray[1] = bearings[b][1];
+    myArray[2] = bearings[b][2];
+    /*
+      Serial.print(myArray[0]);
+      Serial.print(myArray[1]);
+      Serial.print(myArray[2]);
+      Serial.println();
+    */
+
+
+}
 
 //BMP
-void bma_irq(){
-        // Set interrupt to set irq value to true
-        BMA_IRQ = true;
-    }
+void bma_irq()
+{
+    // Set interrupt to set irq value to true
+    BMA_IRQ = true;
+}
 
 void BMA_setup()
 {
     pinMode(BMP_INT1, INPUT_PULLUP);
-    attachInterrupt(BMP_INT1,bma_irq, RISING); //Select the interrupt mode according to the actual circuit
+    attachInterrupt(BMP_INT1, bma_irq, RISING); //Select the interrupt mode according to the actual circuit
 
 
 

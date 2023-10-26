@@ -10,5 +10,5 @@ In the example. Displays date, weather, steps, directions, battery capacity, and
 3. Fill in the correct WIFI SSID and password
 4. You would see it if it were normal
 
-![](../../image/Integration.png)
+![](../../images/Integration.png)
 

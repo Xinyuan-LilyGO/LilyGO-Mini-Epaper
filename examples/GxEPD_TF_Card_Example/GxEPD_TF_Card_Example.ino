@@ -1,12 +1,13 @@
-/*
-    LilyGo Ink Screen Series u8g2Fonts Test
-        - Created by Kaibin he
-*/
+// According to the board, cancel the corresponding macro definition
+// https://www.lilygo.cc/products/mini-e-paper-core , esp32picod4
+// #define LILYGO_MINI_EPAPER_ESP32
+// esp32s3-fn4r2
+// #define LILYGO_MINI_EPAPER_ESP32S3
 
-
-#define LILYGO_T5_V102
-
-
+#if !defined(LILYGO_MINI_EPAPER_ESP32S3)  && !defined(LILYGO_MINI_EPAPER_ESP32)
+// 请在草图上方选择对应的目标板子名称,将它取消注释.
+#error "Please select the corresponding target board name above the sketch and uncomment it."
+#endif
 
 #include <boards.h>
 #include <GxEPD.h>
@@ -31,7 +32,7 @@ GxIO_Class io(SPI,  EPD_CS, EPD_DC,  EPD_RSET);
 GxEPD_Class display(io, EPD_RSET, EPD_BUSY);
 
 #if defined(_HAS_SDCARD_) && !defined(_USE_SHARED_SPI_BUS_)
-SPIClass SDSPI(VSPI);
+SPIClass SDSPI(HSPI);
 #endif
 bool rlst = false;
 
@@ -50,14 +51,8 @@ void setup(void)
     Serial.println();
     Serial.println("setup");
 
-#if defined(LILYGO_EPD_DISPLAY_102)
     pinMode(EPD_POWER_ENABLE, OUTPUT);
     digitalWrite(EPD_POWER_ENABLE, HIGH);
-#endif /*LILYGO_EPD_DISPLAY_102*/
-#if defined(LILYGO_T5_V102)
-    pinMode(POWER_ENABLE, OUTPUT);
-    digitalWrite(POWER_ENABLE, HIGH);
-#endif /*LILYGO_T5_V102*/
 
     SPI.begin(EPD_SCLK, EPD_MISO, EPD_MOSI);
     display.init(); // enable diagnostic output on Serial
@@ -83,7 +78,7 @@ void drawBitmaps_test()
     //int16_t w2 = display.width() / 2;
     // int16_t h2 = display.height() / 2;
     display.setRotation(0);
-    
+
     drawBitmapFromSD("10d@2x.bmp", 0, 0);
     delay(2000);
     drawBitmapFromSD("output5.bmp", 0, 0);
@@ -125,7 +120,7 @@ void LilyGo_logo(void)
     display.setRotation(1);
     display.setTextColor(GxEPD_BLACK);
     display.setFont();
-#if defined(LILYGO_T5_V102)
+#if defined(LILYGO_MINI_EPAPER_ESP32)
     display.setCursor(0, display.height() - 15);
 #else
     display.setCursor(20, display.height() - 15);
