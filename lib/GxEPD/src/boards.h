@@ -213,7 +213,6 @@
 #define IIC_SCL                 (8)
 #define BMP_INT1                (6)
 #define BMP_INT2                (16)
-#define ADC_PIN                 (43)
 
 #define _HAS_ADC_DETECTED_
 #define _HAS_SDCARD_
